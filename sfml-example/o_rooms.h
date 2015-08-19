@@ -8,7 +8,9 @@
 
 enum ROOMS_STATE {
 	IN_OFFICE,
-	CAMERAS
+	CAMERAS,
+	TAB_TO_CAMERAS,
+	TAB_TO_OFFICE
 };
 
 enum DOOR_STATE {
@@ -18,6 +20,11 @@ enum DOOR_STATE {
 	DOOR_STATE_CLOSED
 };
 
+struct sounds_rooms {
+	sound door;
+	sound tab;
+};
+
 struct sprites_rooms {
 	sprite dark_office;
 	sprite left_button_off;
@@ -25,7 +32,9 @@ struct sprites_rooms {
 	sprite right_button_off;
 	sprite right_button_on;
 	sprite left_door[14];
-	sprite rigth_door[14];
+	sprite right_door[14];
+	sprite switcher_to_camera;
+	sprite tablet[11];
 };
 
 struct debug_rooms {
@@ -36,9 +45,13 @@ struct debug_rooms {
 struct enemy {
 };
 
+struct camera_data;
+
 class rooms {
 public:
 	sprites_rooms sprites;
+	sounds_rooms sounds;
+	camera_data *cam;
 	debug_rooms db;
 	float x_shift;
 	DOOR_STATE left_door_state;
@@ -46,6 +59,9 @@ public:
 	DOOR_STATE right_door_state;
 	int right_door_count;
 	ROOMS_STATE state;
+	int tab_count;
+	bool tab_sw;
+	bool was_outside_of_switch_tab;
 	bool left_button_on;
 	bool right_button_on;
 };

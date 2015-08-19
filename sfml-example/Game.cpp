@@ -5,8 +5,8 @@
 
 bool Game::init (bool fullscreen) {
 	std::vector <sf::VideoMode> f_modes = sf::VideoMode::getFullscreenModes ();
-	R_WIND_WIDTH = f_modes[0].width;
-	R_WIND_HEIGHT = f_modes[0].height;
+	R_WIND_WIDTH = 1366;// f_modes[0].width;
+	R_WIND_HEIGHT = 768;// f_modes[0].height;
 	X_FACTOR = float (R_WIND_WIDTH) / float (MY_WIND_WIDTH);
 	Y_FACTOR = float (R_WIND_HEIGHT) / float (MY_WIND_HEIGHT);
 	
@@ -23,7 +23,7 @@ bool Game::init (bool fullscreen) {
 	mouse_left_pressed = 0;
 	return true;
 }
-
+bool mplm[10] = {0};
 void Game::update () {
 	CNTRL ("game_update");
 	rand ();
@@ -41,21 +41,14 @@ void Game::update () {
 			running = false;
 			break;
 		case sf::Event::KeyPressed:
-			Global_Bool_Key_Pressed = true;;
-		case sf::Event::MouseButtonPressed:
-			if (event.mouseButton.button == sf::Mouse::Button::Left) {
-				mouse_left_pressed = true;
-			}
-			break;
-		case sf::Event::MouseButtonReleased:
-			if (event.mouseButton.button == sf::Mouse::Button::Left) {
-				mouse_left_pressed = false;
-			}
-			break;
+			Global_Bool_Key_Pressed = true;
 		default:
 			break;
 		}
 	}
+
+	mouse_left_pressed = sf::Mouse::isButtonPressed (sf::Mouse::Left);
+
 	float dt = (clock.restart ()).asSeconds ();
 	if (dt > 1) {
 		dt = 0;

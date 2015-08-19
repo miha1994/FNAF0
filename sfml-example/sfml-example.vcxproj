@@ -72,12 +72,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="camera.cpp" />
     <ClCompile Include="common_functions.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="func_pointers.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="office.cpp" />
     <ClCompile Include="o_button.cpp" />
     <ClCompile Include="o_control.cpp" />
     <ClCompile Include="o_picture.cpp" />
@@ -90,11 +92,13 @@
     <ClCompile Include="space.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="func_pointers.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="main_header.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="office.h" />
     <ClInclude Include="o_button.h" />
     <ClInclude Include="o_control.h" />
     <ClInclude Include="o_picture.h" />

@@ -9,12 +9,6 @@ void sprite::init(char *file_name, int size_x, int size_y) {
 }
 
 void sprite::draw (sf::RenderWindow *wnd) {
-	v2f o1 = itself.getOrigin ();
-	v2f n1 = o1;
-	n1.x *= X_FACTOR;
-	n1.y *= Y_FACTOR;
-	itself.setOrigin (n1);
-
 	v2f o2 = itself.getPosition ();
 	v2f n2 = o2;
 	n2.x *= X_FACTOR;
@@ -29,7 +23,6 @@ void sprite::draw (sf::RenderWindow *wnd) {
 
 	wnd->draw (itself);
 
-	itself.setOrigin (o1);
 	itself.setPosition (o2);
 	itself.setScale (o3);
 }
