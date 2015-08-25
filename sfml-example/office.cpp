@@ -3,24 +3,53 @@
 #include "rooms_extra.h"
 
 void office_update (float dt, rooms *rm, v2f m) {
+	rm->in_office_time += dt;
+	rm->light_in_office = kb::isKeyPressed (kb::LControl) || kb::isKeyPressed (kb::RControl);
+	if (rm->light_in_office) {
+		if (rm->sounds.light_in_office.snd[0].getStatus() != sf::Sound::Playing) {
+			rm->sounds.light_in_office.play ();
+		}
+	} else {
+		if (rm->sounds.light_in_office.snd[0].getStatus() == sf::Sound::Playing) {
+			rm->sounds.light_in_office.stop ();
+		}
+	}
 	rm->x_shift += dt * speed_of_camera_movement (m.x);
 	if (rm->x_shift > 320) {
 		rm->x_shift = 320;
 	} else if (rm->x_shift < 0) {
 		rm->x_shift = 0;
 	}
-	if (m.x > 300 && m.x < 980 && m.y > 650) {
+	if (m.x > 230 && m.x < 910 && m.y > 650) {
 		if (rm->was_outside_of_switch_tab && rm->left_door_state == DOOR_STATE_OPENED && rm->right_door_state == DOOR_STATE_OPENED) {
 			rm->state = ROOMS_STATE::TAB_TO_CAMERAS;
 			rm->sounds.tab.play ();
 			rm->tab_count = 0;
 			rm->tab_sw = false;
+			rm->light_in_office = false;
+			rm->in_office_time = 0;
 			return;
 		}
 	} else {
 		rm->was_outside_of_switch_tab = true;
 	}
+	if (rm->blink_count == 2) {
+		if (rm->in_office_time > 50 - 1.5f * rm->AI_level[FREDDY]) {
+			rm->state = FREDDY_JUMPSCARE;
+			rm->freddy_jumpscare_count = 0;
+			rm->sounds.jumpscare1.play ();
+			rm->sounds.jumpscare2.play ();
+		}
+	}
 	m.x += rm->x_shift;
+	if (mouse_left_pressed && (sf::Rect <float> (675, 236, 8, 4).contains (m))) {
+		if (!rm->nose_pressed) {
+			rm->sounds.nose.play ();
+			rm->nose_pressed = true;
+		}
+	} else {
+		rm->nose_pressed = false;
+	}
 	if (rm->left_button_on) {// y > 650      300 < x < 980
 		if (!(m.x >= 30 && m.x <= 68 && m.y >= 271 && m.y <= 327)) {
 			rm->left_button_on = false;
@@ -103,8 +132,17 @@ void office_update (float dt, rooms *rm, v2f m) {
 }
 
 void office_render (rooms *rm) {
-	rm->sprites.dark_office.itself.setPosition (-rm->x_shift, 0);
-	rm->sprites.dark_office.draw (&window);
+	if (rm->light_in_office) {
+		rm->sprites.light_office.itself.setPosition (-rm->x_shift, 0);
+		rm->sprites.light_office.draw (&window);
+		rm->sprites.fan[rm->fan_count].draw (&window, true, v2f(780-rm->x_shift,303));
+		if ((++rm->fan_count) > 2) {
+			rm->fan_count = 0;
+		}
+	} else {
+		rm->sprites.dark_office.itself.setPosition (-rm->x_shift, 0);
+		rm->sprites.dark_office.draw (&window);
+	}
 	if (rm->left_door_state != DOOR_STATE_OPENED) {
 		rm->sprites.left_door[rm->left_door_count].itself.setPosition (68-rm->x_shift, 0);
 		rm->sprites.left_door[rm->left_door_count].draw (&window);

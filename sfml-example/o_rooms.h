@@ -6,11 +6,20 @@
 #include <list>
 #include "some_structures.h"
 
+#define BONNIE		0
+#define CHICA		1
+#define FREDDY		2
+#define FOXY		3
+#define GOLDEN		4
+
 enum ROOMS_STATE {
 	IN_OFFICE,
 	CAMERAS,
 	TAB_TO_CAMERAS,
-	TAB_TO_OFFICE
+	TAB_TO_OFFICE,
+	FREDDY_JUMPSCARE,
+	GAME_OVER_STATIC,
+	GAME_OVER_PIC
 };
 
 enum DOOR_STATE {
@@ -20,13 +29,27 @@ enum DOOR_STATE {
 	DOOR_STATE_CLOSED
 };
 
+#define NUM_OF_SOUNDS 10
+
 struct sounds_rooms {
 	sound door;
 	sound tab;
+	sound nose;
+	sound light_in_office;
+	sound amb1;
+	sound amb2;
+	sound cam_reload;
+	sound jumpscare1;
+	sound jumpscare2;
+	sound static_;
+
+	sound *all_sounds[NUM_OF_SOUNDS];
 };
 
 struct sprites_rooms {
 	sprite dark_office;
+	sprite light_office;
+	sprite fan[3];
 	sprite left_button_off;
 	sprite left_button_on;
 	sprite right_button_off;
@@ -35,14 +58,18 @@ struct sprites_rooms {
 	sprite right_door[14];
 	sprite switcher_to_camera;
 	sprite tablet[11];
+	sprite AM;
+	sprite dd[10];
+	sprite night;
+	sprite blink;
+	sprite freddy_jumpscare[28];
+	sprite cam_noize[8];
+	sprite game_over;
 };
 
 struct debug_rooms {
 	sf::Font font;
 	sf::Text text;
-};
-
-struct enemy {
 };
 
 struct camera_data;
@@ -60,10 +87,21 @@ public:
 	int right_door_count;
 	ROOMS_STATE state;
 	int tab_count;
+	int AI_level[5];
+	int fan_count;
+	float time;
+	float amb1_time;
+	float time_until_next_blink;
+	float in_office_time;
+	int blink_count;
+	int freddy_jumpscare_count;
+	int cam_noize_count;
 	bool tab_sw;
 	bool was_outside_of_switch_tab;
 	bool left_button_on;
 	bool right_button_on;
+	bool light_in_office;
+	bool nose_pressed;
 };
 
 extern std_obj_functions rooms_f;

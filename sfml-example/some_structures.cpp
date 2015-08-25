@@ -8,7 +8,11 @@ void sprite::init(char *file_name, int size_x, int size_y) {
 	itself.setTextureRect (sf::Rect<int> (0,0,size_x,size_y));
 }
 
-void sprite::draw (sf::RenderWindow *wnd) {
+void sprite::draw (sf::RenderWindow *wnd, bool f, v2f xy) {
+	if (f) {
+		itself.setPosition (xy);
+	}
+
 	v2f o2 = itself.getPosition ();
 	v2f n2 = o2;
 	n2.x *= X_FACTOR;
