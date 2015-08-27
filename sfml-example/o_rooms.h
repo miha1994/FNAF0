@@ -19,7 +19,8 @@ enum ROOMS_STATE {
 	TAB_TO_OFFICE,
 	FREDDY_JUMPSCARE,
 	GAME_OVER_STATIC,
-	GAME_OVER_PIC
+	GAME_OVER_PIC,
+	WIN
 };
 
 enum DOOR_STATE {
@@ -29,7 +30,7 @@ enum DOOR_STATE {
 	DOOR_STATE_CLOSED
 };
 
-#define NUM_OF_SOUNDS 10
+#define NUM_OF_SOUNDS 12
 
 struct sounds_rooms {
 	sound door;
@@ -42,6 +43,8 @@ struct sounds_rooms {
 	sound jumpscare1;
 	sound jumpscare2;
 	sound static_;
+	sound win1;
+	sound win2;
 
 	sound *all_sounds[NUM_OF_SOUNDS];
 };
@@ -65,6 +68,9 @@ struct sprites_rooms {
 	sprite freddy_jumpscare[28];
 	sprite cam_noize[8];
 	sprite game_over;
+	sprite win_5;
+	sprite win_6;
+	sprite win_am;
 };
 
 struct debug_rooms {

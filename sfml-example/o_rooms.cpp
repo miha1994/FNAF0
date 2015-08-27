@@ -47,6 +47,9 @@ O_LOAD (rooms_load) {
 	spr->fan[2].init ("assets/textures/office/60.png",137,196);
 	spr->game_over.init ("assets/textures/camera/358.png", 1280, 720);
 	rm->fan_count = 0;
+	spr->win_5.init ("assets/textures/inscriptiones/350.png", 53, 72);
+	spr->win_6.init ("assets/textures/inscriptiones/351.png", 53, 72);
+	spr->win_am.init ("assets/textures/inscriptiones/352.png", 113, 72);
 	char str[50];
 	FOR (i, 14) {
 		sprintf (str, "assets/textures/office/left_door/%d.png", i);
@@ -124,6 +127,10 @@ O_LOAD (rooms_load) {
 	snd->all_sounds[8] = &snd->jumpscare2;
 	snd->static_.loadFromFile ("assets/snd/static.wav", 100);
 	snd->all_sounds[9] = &snd->static_;
+	snd->win1.loadFromFile ("assets/snd/chimes 2.wav",100);
+	snd->all_sounds[10] = &snd->win1;
+	snd->win2.loadFromFile ("assets/snd/CROWD_SMALL_CHIL_EC049202.wav",100);
+	snd->all_sounds[11] = &snd->win2;
 
 	rm->left_door_count = 0;
 	rm->left_door_state = DOOR_STATE_OPENED;
@@ -152,6 +159,16 @@ O_UPDATE (rooms_update) {
 	CNTRL ("rooms_update");
 	O_DECL (rooms, rm);
 
+	if (rm->state == WIN) {
+		rm->time += dt;
+		if (rm->time > 10) {
+			control *mc = (control *)main_control;
+			mc->todo.push_back (instruction ("delete", "L0"));
+			mc->todo.push_back (instruction ("load", "MENU"));
+			mc->todo.push_back (instruction ("active", "MENU"));
+		}
+		return false;
+	}
 	if (kb::isKeyPressed (kb::Num0)) {
 		dt *= 10;
 	}
@@ -282,6 +299,8 @@ O_RENDER (rooms_render) {
 	case GAME_OVER_PIC:
 		spr->game_over.draw (&window);
 		break;
+	case WIN:
+		break;
 	default:
 		break;
 	}
@@ -290,6 +309,12 @@ O_RENDER (rooms_render) {
 		sprites_rooms *spr = &rm->sprites;
 
 		if (rm->blink_count) {
+			if (rm->blink_count == 3 && am > 5) {
+				rm->state = WIN;
+				stop_all_sounds (rm);
+				rm->time = 0;
+				rm->sounds.win1.play ();
+			}
 			float force = fabs (float(3) - rm->blink_count);
 			spr->blink.itself.setColor (sf::Color (255,255,255,255 - force * 85));
 			spr->blink.draw (&window);
