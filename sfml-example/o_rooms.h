@@ -12,6 +12,8 @@
 #define FOXY		3
 #define GOLDEN		4
 
+int float_in_range (float v, int min, int max);
+
 enum ROOMS_STATE {
 	IN_OFFICE,
 	CAMERAS,
@@ -88,19 +90,20 @@ public:
 	debug_rooms db;
 	float x_shift;
 	DOOR_STATE left_door_state;
-	int left_door_count;
+	float left_door_count;
 	DOOR_STATE right_door_state;
-	int right_door_count;
+	float right_door_count;
 	ROOMS_STATE state;
-	int tab_count;
+	float tab_count;
 	int AI_level[5];
 	int fan_count;
 	float time;
 	float amb1_time;
 	float time_until_next_blink;
 	float in_office_time;
+	float FPS;
 	int blink_count;
-	int freddy_jumpscare_count;
+	float freddy_jumpscare_count;
 	int cam_noize_count;
 	bool tab_sw;
 	bool was_outside_of_switch_tab;
@@ -108,6 +111,7 @@ public:
 	bool right_button_on;
 	bool light_in_office;
 	bool nose_pressed;
+	bool last_mlp;
 };
 
 extern std_obj_functions rooms_f;

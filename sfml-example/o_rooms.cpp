@@ -25,6 +25,11 @@ int AI_LEVELS[6][5] = {
 	{0,0,0,0,0}
 };
 
+int float_in_range (float v, int min, int max) {
+	int l_min = Min (v, max);
+	return Max (min, l_min);
+}
+
 void stop_all_sounds(rooms *rm) {
 	FOR (i, NUM_OF_SOUNDS) {
 		rm->sounds.all_sounds[i]->stop ();
@@ -36,6 +41,8 @@ O_LOAD (rooms_load) {
 	rooms *rm = new rooms;
 
 	rm->state = IN_OFFICE;
+	rm->FPS = 60;
+	rm->last_mlp = false;
 
 	sprites_rooms *spr = &rm->sprites;
 	spr->dark_office.init ("assets/textures/office/304.png", 1600, 720);
@@ -105,21 +112,21 @@ O_LOAD (rooms_load) {
 	camera_init (rm);
 
 	sounds_rooms *snd = &rm->sounds;
-	snd->door.loadFromFile ("assets/snd/Door.wav",100);
+	snd->door.loadFromFile ("assets/snd/Door.wav",50);
 	snd->all_sounds[0] = &snd->door;
-	snd->tab.loadFromFile ("assets/snd/CAMERA_VIDEO_LOA_60105303.wav",100);
+	snd->tab.loadFromFile ("assets/snd/CAMERA_VIDEO_LOA_60105303.wav",50);
 	snd->all_sounds[1] = &snd->tab;
-	snd->nose.loadFromFile ("assets/snd/PartyFavorraspyPart_AC01__3.wav", 100);
+	snd->nose.loadFromFile ("assets/snd/PartyFavorraspyPart_AC01__3.wav", 60);
 	snd->all_sounds[2] = &snd->nose;
-	snd->light_in_office.loadFromFile ("assets/snd/BallastHumMedium2.wav", 100);
+	snd->light_in_office.loadFromFile ("assets/snd/BallastHumMedium2.wav", 50);
 	snd->light_in_office.snd[0].setLoop (true);
 	snd->all_sounds[3] = &snd->light_in_office;
-	snd->amb1.loadFromFile ("assets/snd/ColdPresc B.wav", 100);
+	snd->amb1.loadFromFile ("assets/snd/ColdPresc B.wav", 50);
 	snd->all_sounds[4] = &snd->amb1;
 	snd->amb2.loadFromFile ("assets/snd/EerieAmbienceLargeSca_MV005.wav", 100);
 	snd->amb2.snd[0].setLoop (true);
 	snd->all_sounds[5] = &snd->amb2;
-	snd->cam_reload.loadFromFile ("assets/snd/blip3.wav", 100);
+	snd->cam_reload.loadFromFile ("assets/snd/blip3.wav", 50);
 	snd->all_sounds[6] = &snd->cam_reload;
 	snd->jumpscare1.loadFromFile ("assets/snd/animatronic/XSCREAM.wav", 100);
 	snd->all_sounds[7] = &snd->jumpscare1;
@@ -159,6 +166,9 @@ O_UPDATE (rooms_update) {
 	CNTRL ("rooms_update");
 	O_DECL (rooms, rm);
 
+	if (kb::isKeyPressed (kb::F)) {
+		rm->FPS = 1.f / dt;
+	}
 	if (rm->state == WIN) {
 		rm->time += dt;
 		if (rm->time > 10) {
@@ -167,34 +177,39 @@ O_UPDATE (rooms_update) {
 			mc->todo.push_back (instruction ("load", "MENU"));
 			mc->todo.push_back (instruction ("active", "MENU"));
 		}
+		rm->last_mlp = mouse_left_pressed;
 		return false;
 	}
-	if (kb::isKeyPressed (kb::Num0)) {
+	if (kb::isKeyPressed (kb::Num0) && rm->state != FREDDY_JUMPSCARE) {
 		dt *= 10;
 	}
-	if (kb::isKeyPressed (kb::Num3)) {
+	if (kb::isKeyPressed (kb::Num3) && rm->state != FREDDY_JUMPSCARE) {
 		dt *= 3;
 	}
-
 	rm->time += dt;
-	if (rm->time < 180) {
-		rm->sounds.amb2.setVolume (0);
-	} else {
-		rm->sounds.amb2.setVolume ( (rm->time - 180) * 5.0 / 9.0);
-	}
-	if (rm->sounds.amb2.snd[0].getStatus () != sf::Sound::Playing) {
-		rm->sounds.amb2.play ();
-	}
-	if ((rm->amb1_time -= dt) < 0) {
-		rm->sounds.amb1.play ();
-		rm->amb1_time += 110;
-	}
-	if (rm->blink_count) {
-		--rm->blink_count;
-	} else {
-		if ((rm->time_until_next_blink -= dt) < 0) {
-			rm->blink_count = 5;
-			rm->time_until_next_blink = rand1 * 2.7f;
+	if (rm->state == CAMERAS ||
+		rm->state == IN_OFFICE ||
+		rm->state == TAB_TO_CAMERAS ||
+		rm->state == TAB_TO_OFFICE) {
+		if (rm->time < 180) {
+			rm->sounds.amb2.setVolume (0);
+		} else {
+			rm->sounds.amb2.setVolume ( (rm->time - 180) * 5.0 / 18.0);
+		}
+		if (rm->sounds.amb2.snd[0].getStatus () != sf::Sound::Playing) {
+			rm->sounds.amb2.play ();
+		}
+		if ((rm->amb1_time -= dt) < 0) {
+			rm->sounds.amb1.play ();
+			rm->amb1_time += 110;
+		}
+		if (rm->blink_count) {
+			--rm->blink_count;
+		} else {
+			if ((rm->time_until_next_blink -= dt) < 0) {
+				rm->blink_count = 5;
+				rm->time_until_next_blink = rand1 * 2.7f;
+			}
 		}
 	}
 	rm->cam_noize_count = (rm->cam_noize_count + 1) % 8;
@@ -209,10 +224,10 @@ O_UPDATE (rooms_update) {
 		break;
 	case TAB_TO_CAMERAS:
 		if (rm->tab_sw) {
-			++rm->tab_count;
+			rm->tab_count += dt*60.0f;
 		}
 		rm->tab_sw = !rm->tab_sw;
-		if (rm->tab_count == 11) {
+		if (rm->tab_count > 11) {
 			rm->state = CAMERAS;
 			rm->was_outside_of_switch_tab = false;
 			camera_another_opening (rm);
@@ -222,7 +237,7 @@ O_UPDATE (rooms_update) {
 		break;
 	case TAB_TO_OFFICE:
 		if (rm->tab_sw) {
-			--rm->tab_count;
+			rm->tab_count -= dt*60;
 		}
 		rm->tab_sw = !rm->tab_sw;
 		if (rm->tab_count < 0) {
@@ -232,7 +247,7 @@ O_UPDATE (rooms_update) {
 		}
 		break;
 	case FREDDY_JUMPSCARE:
-		if (rm->freddy_jumpscare_count == 54) {
+		if ((rm->freddy_jumpscare_count += dt*25) >= 28) {
 			rm->state = GAME_OVER_STATIC;
 			stop_all_sounds(rm);
 			rm->sounds.static_.play ();
@@ -243,7 +258,7 @@ O_UPDATE (rooms_update) {
 		} else if (rm->x_shift < 0) {
 			rm->x_shift = 0;
 		}
-		rm->sprites.freddy_jumpscare[rm->freddy_jumpscare_count/2].itself.setPosition(-rm->x_shift, 0);
+		rm->sprites.freddy_jumpscare[float_in_range(rm->freddy_jumpscare_count,0,27)].itself.setPosition(-rm->x_shift, 0);
 		break;
 	case GAME_OVER_STATIC:
 		if (rm->sounds.static_.snd[0].getStatus () != sf::Sound::Playing) {
@@ -260,6 +275,7 @@ O_UPDATE (rooms_update) {
 		break;
 	}
 
+	rm->last_mlp = mouse_left_pressed;
 	return false;
 }
 
@@ -281,16 +297,16 @@ O_RENDER (rooms_render) {
 		break;
 	case TAB_TO_CAMERAS:
 		office_render (rm);
-		rm->sprites.tablet[rm->tab_count].draw (&window);
+		rm->sprites.tablet[float_in_range (rm->tab_count, 0, 10)].draw (&window);
 		render_std = true;
 		break;
 	case TAB_TO_OFFICE:
 		office_render (rm);
-		rm->sprites.tablet[rm->tab_count].draw (&window);
+		rm->sprites.tablet[float_in_range (rm->tab_count, 0, 10)].draw (&window);
 		render_std = true;
 		break;
 	case FREDDY_JUMPSCARE:
-		rm->sprites.freddy_jumpscare[(rm->freddy_jumpscare_count++)/2].draw (&window);
+		rm->sprites.freddy_jumpscare[float_in_range(rm->freddy_jumpscare_count,0,27)].draw (&window);
 		break;
 	case GAME_OVER_STATIC:
 		spr->cam_noize[rm->cam_noize_count].itself.setColor (sf::Color::White);
@@ -338,7 +354,7 @@ O_RENDER (rooms_render) {
 		rm->sprites.AM.draw (&window);
 		rm->sprites.night.draw (&window);
 
-		rm->db.text.setString (rm->db.text.getString () + "\n" + std::to_string (int(rm->time)));
+		rm->db.text.setString (rm->db.text.getString () + "\n" + std::to_string (int(rm->time)) + "\n" + std::to_string (int(rm->FPS)));
 		window.draw (rm->db.text);
 	}
 }

@@ -51,17 +51,17 @@ void office_update (float dt, rooms *rm, v2f m) {
 		rm->nose_pressed = false;
 	}
 	if (rm->left_button_on) {// y > 650      300 < x < 980
-		if (!(m.x >= 30 && m.x <= 68 && m.y >= 271 && m.y <= 327)) {
+		if (!(m.x >= 30 && m.x <= 68 && m.y >= 271 && m.y <= 327) || !mouse_left_pressed) {
 			rm->left_button_on = false;
 		}
-	} else if (mouse_left_pressed && (m.x >= 30 && m.x <= 68 && m.y >= 271 && m.y <= 327)) {
+	} else if (!rm->last_mlp && mouse_left_pressed && (m.x >= 30 && m.x <= 68 && m.y >= 271 && m.y <= 327)) {
 		rm->left_button_on = true;
 	}
 	if (rm->right_button_on) {
-		if (!(m.x >= 1532 && m.x <= 1570 && m.y >= 271 && m.y <= 327)) {
+		if (!(m.x >= 1532 && m.x <= 1570 && m.y >= 271 && m.y <= 327) || !mouse_left_pressed) {
 			rm->right_button_on = false;
 		}
-	} else if (mouse_left_pressed && (m.x >= 1532 && m.x <= 1570 && m.y >= 271 && m.y <= 327)) {
+	} else if (!rm->last_mlp && mouse_left_pressed && (m.x >= 1532 && m.x <= 1570 && m.y >= 271 && m.y <= 327)) {
 		rm->right_button_on = true;
 	}
 	switch (rm->left_door_state) {
@@ -80,18 +80,18 @@ void office_update (float dt, rooms *rm, v2f m) {
 		}
 		break;
 	case DOOR_STATE_IS_OPENING:
-		if (!rm->left_door_count) {
+		if (rm->left_door_count <= 0) {
 			rm->left_door_state = DOOR_STATE_OPENED;
 		} else {
-			--rm->left_door_count;
+			rm->left_door_count -= dt*45.f;
 		}
 		rm->left_button_on = false;
 		break;
 	case DOOR_STATE_IS_CLOSING:
-		if (rm->left_door_count == 13) {
+		if (rm->left_door_count >= 13) {
 			rm->left_door_state = DOOR_STATE_CLOSED;
 		} else {
-			++rm->left_door_count;
+			rm->left_door_count += dt*45.f;
 		}
 		rm->left_button_on = true;
 		break;
@@ -112,18 +112,18 @@ void office_update (float dt, rooms *rm, v2f m) {
 		}
 		break;
 	case DOOR_STATE_IS_OPENING:
-		if (!rm->right_door_count) {
+		if (rm->right_door_count <= 0) {
 			rm->right_door_state = DOOR_STATE_OPENED;
 		} else {
-			--rm->right_door_count;
+			rm->right_door_count -= dt*45.f;
 		}
 		rm->right_button_on = false;
 		break;
 	case DOOR_STATE_IS_CLOSING:
-		if (rm->right_door_count == 13) {
+		if (rm->right_door_count >= 13) {
 			rm->right_door_state = DOOR_STATE_CLOSED;
 		} else {
-			++rm->right_door_count;
+			rm->right_door_count += dt * 45.f;
 		}
 		rm->right_button_on = true;
 		break;
@@ -144,12 +144,12 @@ void office_render (rooms *rm) {
 		rm->sprites.dark_office.draw (&window);
 	}
 	if (rm->left_door_state != DOOR_STATE_OPENED) {
-		rm->sprites.left_door[rm->left_door_count].itself.setPosition (68-rm->x_shift, 0);
-		rm->sprites.left_door[rm->left_door_count].draw (&window);
+		rm->sprites.left_door[float_in_range (rm->left_door_count,0,13)].itself.setPosition (68-rm->x_shift, 0);
+		rm->sprites.left_door[float_in_range (rm->left_door_count,0,13)].draw (&window);
 	}
 	if (rm->right_door_state != DOOR_STATE_OPENED) {
-		rm->sprites.right_door[rm->right_door_count].itself.setPosition (1498-rm->x_shift, 0);
-		rm->sprites.right_door[rm->right_door_count].draw (&window);
+		rm->sprites.right_door[float_in_range (rm->right_door_count,0,13)].itself.setPosition (1498-rm->x_shift, 0);
+		rm->sprites.right_door[float_in_range (rm->right_door_count,0,13)].draw (&window);
 	}
 	if (rm->left_button_on) {
 		rm->sprites.left_button_on.itself.setPosition (0-rm->x_shift, 220);

@@ -1,39 +1,18 @@
-﻿Build started 27.08.2015 11:29:55.
-     1>Project "C:\Users\Михаил\Documents\Visual Studio 2012\Projects\sfml-example\sfml-example\sfml-example.vcxproj" on node 2 (Build target(s)).
+﻿Build started 29.08.2015 23:56:57.
+     1>Project "C:\Users\User\Documents\Visual Studio 2012\Projects\FNAF0\sfml-example\sfml-example.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\SFML-2.1\include" /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D SFML_STATIC /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt camera.cpp enemy.cpp func_pointers.cpp o_rooms.cpp office.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I"D:\SFML-2.3.1\include" /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D SFML_STATIC /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt camera.cpp
          camera.cpp
-     1>camera.cpp(23): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>camera.cpp(69): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-     1>camera.cpp(27): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>camera.cpp(73): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-     1>camera.cpp(31): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>camera.cpp(80): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-         enemy.cpp
-         func_pointers.cpp
-         o_rooms.cpp
-     1>o_rooms.cpp(55): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>camera.cpp(84): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-     1>o_rooms.cpp(63): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-     1>o_rooms.cpp(67): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-     1>o_rooms.cpp(71): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-     1>o_rooms.cpp(75): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-     1>o_rooms.cpp(79): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\stdio.h(357) : see declaration of 'sprintf'
-     1>o_rooms.cpp(85): warning C4305: 'argument' : truncation from 'double' to 'float'
-     1>o_rooms.cpp(89): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>o_rooms.cpp(183): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
-     1>o_rooms.cpp(308): warning C4244: 'initializing' : conversion from 'float' to 'int', possible loss of data
-     1>o_rooms.cpp(319): warning C4244: 'argument' : conversion from 'float' to 'sf::Uint8', possible loss of data
-     1>o_rooms.cpp(325): warning C4305: 'initializing' : truncation from 'double' to 'float'
-     1>o_rooms.cpp(330): warning C4305: 'initializing' : truncation from 'double' to 'float'
-         office.cpp
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Михаил\Documents\Visual Studio 2012\Projects\sfml-example\Release\sfml-example.exe" /NOLOGO /LIBPATH:"C:\Program Files (x86)\SFML-2.1\lib" "sfml-graphics-s.lib" "sfml-window-s.lib" "sfml-system-s.lib" "sfml-audio-s.lib" "sfml-main.lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Михаил\Documents\Visual Studio 2012\Projects\sfml-example\Release\sfml-example.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Михаил\Documents\Visual Studio 2012\Projects\sfml-example\Release\sfml-example.lib" /MACHINE:X86 /SAFESEH Release\camera.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\User\Documents\Visual Studio 2012\Projects\FNAF0\Release\sfml-example.exe" /NOLOGO /LIBPATH:"D:\SFML-2.3.1\lib" "sfml-graphics-s.lib" "sfml-window-s.lib" "sfml-system-s.lib" "sfml-audio-s.lib" "sfml-main.lib" opengl32.lib winmm.lib gdi32.lib freetype.lib jpeg.lib openal32.lib flac.lib vorbisenc.lib vorbisfile.lib vorbis.lib ogg.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\User\Documents\Visual Studio 2012\Projects\FNAF0\Release\sfml-example.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\User\Documents\Visual Studio 2012\Projects\FNAF0\Release\sfml-example.lib" /MACHINE:X86 /SAFESEH Release\camera.obj
          Release\common_functions.obj
          Release\enemy.obj
          Release\func_pointers.obj
@@ -52,12 +31,13 @@
          Release\some_structures.obj
          Release\space.obj
          Generating code
-     1>c:\users\михаил\documents\visual studio 2012\projects\sfml-example\sfml-example\rooms_extra.cpp(25): warning C4715: 'speed_of_camera_movement' : not all control paths return a value
-     1>c:\users\михаил\documents\visual studio 2012\projects\sfml-example\sfml-example\common_functions.cpp(32): warning C4715: 'get_command' : not all control paths return a value
+     1>c:\users\user\documents\visual studio 2012\projects\fnaf0\sfml-example\rooms_extra.cpp(25): warning C4715: 'speed_of_camera_movement' : not all control paths return a value
+     1>c:\users\user\documents\visual studio 2012\projects\fnaf0\sfml-example\camera.cpp(49): warning C4715: 'number_of_png' : not all control paths return a value
+     1>c:\users\user\documents\visual studio 2012\projects\fnaf0\sfml-example\common_functions.cpp(32): warning C4715: 'get_command' : not all control paths return a value
          Finished generating code
-         sfml-example.vcxproj -> C:\Users\Михаил\Documents\Visual Studio 2012\Projects\sfml-example\Release\sfml-example.exe
-     1>Done Building Project "C:\Users\Михаил\Documents\Visual Studio 2012\Projects\sfml-example\sfml-example\sfml-example.vcxproj" (Build target(s)).
+         sfml-example.vcxproj -> C:\Users\User\Documents\Visual Studio 2012\Projects\FNAF0\Release\sfml-example.exe
+     1>Done Building Project "C:\Users\User\Documents\Visual Studio 2012\Projects\FNAF0\sfml-example\sfml-example.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:15.33
+Time Elapsed 00:00:03.25

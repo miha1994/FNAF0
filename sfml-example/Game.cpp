@@ -5,8 +5,8 @@
 
 bool Game::init (bool fullscreen) {
 	std::vector <sf::VideoMode> f_modes = sf::VideoMode::getFullscreenModes ();
-	R_WIND_WIDTH = 1366;// f_modes[0].width;
-	R_WIND_HEIGHT = 768;// f_modes[0].height;
+	R_WIND_WIDTH = f_modes[0].width;
+	R_WIND_HEIGHT = f_modes[0].height;
 	X_FACTOR = float (R_WIND_WIDTH) / float (MY_WIND_WIDTH);
 	Y_FACTOR = float (R_WIND_HEIGHT) / float (MY_WIND_HEIGHT);
 	

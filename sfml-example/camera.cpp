@@ -1,6 +1,52 @@
 #include "camera.h"
 
 int item_name_num[11] = {165, 172, 173, 169, 168, 174, 171, 170, 176, 175, 177};
+int cam_watch_im_numbers[] = {188, 478, 479, 540, 571, 43, 44, 206, 49, 220, 451, 476, 486, 67, 221, 226, 487, 546, 554, 62, 190, 83, 205, 354, 55, 48, 90,
+	120, 215, 222, 492, 1, 2, 19, 68, 223, 224, 355, 484, 41, 217, 219, 494, 66, 211, 338, 240, 553, 0};
+
+float ____repeat = 0.07f;
+bool ____last_value = false;
+
+int number_of_png (rooms *rm) {
+	camera_data *cam = rm->cam;
+	switch (cam->cur) {
+	case 0:
+		return 0;
+	case 1:
+		{
+			bool light;
+			if ((____repeat -= cam->dt) > 0) {
+				light = ____last_value;
+			} else {
+				light = rand1 > 0.5;
+				____last_value = light;
+				____repeat += 0.04f;
+			}
+			if (light) {
+				return 44;
+			}
+			return 43;
+		}
+	case 2:
+		return 49;
+	case 3:
+		return 67;
+	case 4:
+		return 62;
+	case 5:
+		return 83;
+	case 6:
+		return 48;
+	case 7:
+		return 19;
+	case 8:
+		return 41;
+	case 9:
+		return 1;
+	case 10:
+		return 66;
+	}
+}
 
 void camera_init (rooms *rm) {
 	camera_data *cam = rm->cam;
@@ -23,6 +69,13 @@ void camera_init (rooms *rm) {
 		sprintf (str, "assets/textures/map/%d.png", 167 - i);
 		spr->cam_item[i].init (str, 60, 40);
 	}
+	for (int *p = cam_watch_im_numbers; true; ++p) {
+		sprintf (str, "assets/textures/camera/%d.png", *p);
+		spr->rooms[*p].init (str, 1600, 720);
+		if (*p == 0) {
+			break;
+		}
+	}
 	FOR (i, 11) {
 		sprintf (str, "assets/textures/map/%d.png", item_name_num[i]);
 		spr->item_name[i].init (str, 31, 25);
@@ -37,7 +90,9 @@ void camera_init (rooms *rm) {
 	spr->map[1].init ("assets/textures/map/164.png", 400,400);
 	spr->map[1].itself.setPosition (854, 315);
 	
-	
+	cam->watch_time = 1.f;
+	cam->w_s = WATCH_LEFT;
+	cam->shift = 0.f;
 	cam->you_big = false;
 	cam->you_map_time = 0.f;
 
@@ -52,6 +107,7 @@ void camera_another_opening (rooms *rm) {
 
 void camera_update (float dt, rooms *rm, v2f m) {
 	camera_data *cam = rm->cam;
+	cam->dt = dt;
 	if ((cam->you_map_time -= dt) < 0) {
 		cam->you_map_time += 1.0f;
 		cam->you_big = !cam->you_big;
@@ -86,6 +142,33 @@ void camera_update (float dt, rooms *rm, v2f m) {
 			}
 		}
 	}
+	cam->watch_time -= dt;
+	switch (cam->w_s) {
+	case WATCH_LEFT:
+		if (cam->watch_time < 0) {
+			cam->w_s = WATCH_MOVING_TO_THE_RIGHT;
+		}
+		break;
+	case WATCH_RIGHT:
+		if (cam->watch_time < 0) {
+			cam->w_s = WATCH_MOVING_TO_THE_LEFT;
+		}
+		break;
+	case WATCH_MOVING_TO_THE_LEFT:
+		if ((cam->shift -= dt*40) < 0) {
+			cam->shift = 0;
+			cam->watch_time = 2.0f;
+			cam->w_s = WATCH_LEFT;
+		}
+		break;
+	case WATCH_MOVING_TO_THE_RIGHT:
+		if ((cam->shift += dt*40) > 320) {
+			cam->shift = 320;
+			cam->watch_time = 2.0f;
+			cam->w_s = WATCH_RIGHT;
+		}
+		break;
+	}
 	//rm->db.text.setString (std::to_string (int(cam->cur)));
 	rm->db.text.setString (std::to_string (int(m.x)) + ", " + std::to_string (int(m.y)));
 }
@@ -94,6 +177,11 @@ void camera_render (rooms *rm) {
 	sprites_rooms *spr = &rm->sprites;
 	camera_data *cam = rm->cam;
 	sprites_camera* cspr = &cam->sprites;
+	sprite *ls = &cspr->rooms[number_of_png (rm)];
+	if (cam->cur != 4) {
+		ls->itself.setPosition (-cam->shift, 0);
+	}
+	ls->draw (&window);
 	cspr->map[cam->you_big].draw (&window);
 	FOR (i, 11) {
 		int cam_item_num = (cam->cur == i) && cam->cur_item_is_yellow;
