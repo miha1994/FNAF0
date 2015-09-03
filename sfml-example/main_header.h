@@ -95,4 +95,12 @@ public:
 			snd[z].stop ();
 		}
 	}
+	bool isPlaying () {
+		FOR (z, 3) {
+			if (snd[z].getStatus () == sf::Sound::Playing) {
+				return true;
+			}
+		}
+		return false;
+	}
 };

@@ -9,7 +9,6 @@ bool Game::init (bool fullscreen) {
 	R_WIND_HEIGHT = f_modes[0].height;
 	X_FACTOR = float (R_WIND_WIDTH) / float (MY_WIND_WIDTH);
 	Y_FACTOR = float (R_WIND_HEIGHT) / float (MY_WIND_HEIGHT);
-	
 	window.create (f_modes[0], "Five Nights at Freddy's 0", fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
 	window.setVerticalSyncEnabled (true);
 	window.setFramerateLimit (60);

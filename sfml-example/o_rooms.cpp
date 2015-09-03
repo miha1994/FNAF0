@@ -17,7 +17,7 @@ int current_night = 1;
 #define GOLDEN		4
 */
 int AI_LEVELS[6][5] = {
-	{0,0,1,0,1},
+	{10,10,1,0,1},
 	{0,0,0,0,0},
 	{0,0,0,0,0},
 	{0,0,0,0,0},
@@ -34,6 +34,9 @@ void stop_all_sounds(rooms *rm) {
 	FOR (i, NUM_OF_SOUNDS) {
 		rm->sounds.all_sounds[i]->stop ();
 	}
+	FOR (i, 21) {
+		rm->cam->sounds.animatronic[i].stop ();
+	}
 }
 
 O_LOAD (rooms_load) {
@@ -43,6 +46,7 @@ O_LOAD (rooms_load) {
 	rm->state = IN_OFFICE;
 	rm->FPS = 60;
 	rm->last_mlp = false;
+	rm->number_of_night = 0;
 
 	sprites_rooms *spr = &rm->sprites;
 	spr->dark_office.init ("assets/textures/office/304.png", 1600, 720);
@@ -54,9 +58,12 @@ O_LOAD (rooms_load) {
 	spr->fan[2].init ("assets/textures/office/60.png",137,196);
 	spr->game_over.init ("assets/textures/camera/358.png", 1280, 720);
 	rm->fan_count = 0;
-	spr->win_5.init ("assets/textures/inscriptiones/350.png", 53, 72);
-	spr->win_6.init ("assets/textures/inscriptiones/351.png", 53, 72);
-	spr->win_am.init ("assets/textures/inscriptiones/352.png", 113, 72);
+	spr->win_5.init ("assets/textures/inscriptions/350.png", 53, 72);
+	spr->win_6.init ("assets/textures/inscriptions/351.png", 53, 72);
+	spr->win_am.init ("assets/textures/inscriptions/352.png", 113, 72);
+	spr->win_am.itself.setPosition (625, 312);
+	spr->win_black.init ("assets/textures/wtf/327.png", 1280, 720);
+	spr->win_black.texture.setSmooth (false);
 	char str[50];
 	FOR (i, 14) {
 		sprintf (str, "assets/textures/office/left_door/%d.png", i);
@@ -134,9 +141,10 @@ O_LOAD (rooms_load) {
 	snd->all_sounds[8] = &snd->jumpscare2;
 	snd->static_.loadFromFile ("assets/snd/static.wav", 100);
 	snd->all_sounds[9] = &snd->static_;
+	snd->game_over.loadFromFile ("assets/snd/stare.wav", 100);
 	snd->win1.loadFromFile ("assets/snd/chimes 2.wav",100);
 	snd->all_sounds[10] = &snd->win1;
-	snd->win2.loadFromFile ("assets/snd/CROWD_SMALL_CHIL_EC049202.wav",100);
+	snd->win2.loadFromFile ("assets/snd/CROWD_SMALL_CHIL_EC049202.wav",50);
 	snd->all_sounds[11] = &snd->win2;
 
 	rm->left_door_count = 0;
@@ -157,6 +165,9 @@ O_LOAD (rooms_load) {
 	rm->time = 0.0f;
 	rm->in_office_time = 0;
 	rm->cam_noize_count = 0;
+	FOR (i, 5) {
+		rm->AI_level[i] = AI_LEVELS[rm->number_of_night][i];
+	}
 
 	read_string ();
 	return (char *)rm;
@@ -170,6 +181,9 @@ O_UPDATE (rooms_update) {
 		rm->FPS = 1.f / dt;
 	}
 	if (rm->state == WIN) {
+		v2f m;
+		get_mouse_pos (m);
+		rm->db.text.setString (std::to_string (m.x) + " " + std::to_string (m.y));
 		rm->time += dt;
 		if (rm->time > 10) {
 			control *mc = (control *)main_control;
@@ -177,8 +191,23 @@ O_UPDATE (rooms_update) {
 			mc->todo.push_back (instruction ("load", "MENU"));
 			mc->todo.push_back (instruction ("active", "MENU"));
 		}
+		if (rm->time > 4.0f && rm->time < 5.0f && rm->sounds.win2.snd[0].getStatus () != sf::Sound::Playing) {
+			rm->sounds.win2.play ();
+		}
+		if (rm->time < 1.0) {
+			rm->sprites.win_5.itself.setPosition (530, 312);
+			rm->sprites.win_6.itself.setPosition (530, 430);
+		} else if (rm->time < 5) {
+			rm->sprites.win_5.itself.setPosition (530, 312 - (430-312)* (rm->time - 1.0)/4.0);
+			rm->sprites.win_6.itself.setPosition (530, 430 - (430-312)* (rm->time - 1.0)/4.0);
+		} else {
+			rm->sprites.win_6.itself.setPosition (530, 312);
+		}
 		rm->last_mlp = mouse_left_pressed;
 		return false;
+	}
+	if (kb::isKeyPressed (kb::Num5) && rm->state != FREDDY_JUMPSCARE) {
+		dt *= 50;
 	}
 	if (kb::isKeyPressed (kb::Num0) && rm->state != FREDDY_JUMPSCARE) {
 		dt *= 10;
@@ -206,7 +235,7 @@ O_UPDATE (rooms_update) {
 		if (rm->blink_count) {
 			--rm->blink_count;
 		} else {
-			if ((rm->time_until_next_blink -= dt) < 0) {
+			if ((rm->time_until_next_blink -= dt) < 0 || rm->time >=360) {
 				rm->blink_count = 5;
 				rm->time_until_next_blink = rand1 * 2.7f;
 			}
@@ -250,7 +279,8 @@ O_UPDATE (rooms_update) {
 		if ((rm->freddy_jumpscare_count += dt*25) >= 28) {
 			rm->state = GAME_OVER_STATIC;
 			stop_all_sounds(rm);
-			rm->sounds.static_.play ();
+			rm->sounds.game_over.play ();
+			rm->amb1_time = 0;
 		}
 		rm->x_shift += dt * speed_of_camera_movement (m.x);
 		if (rm->x_shift > 320) {
@@ -261,8 +291,9 @@ O_UPDATE (rooms_update) {
 		rm->sprites.freddy_jumpscare[float_in_range(rm->freddy_jumpscare_count,0,27)].itself.setPosition(-rm->x_shift, 0);
 		break;
 	case GAME_OVER_STATIC:
-		if (rm->sounds.static_.snd[0].getStatus () != sf::Sound::Playing) {
+		if ((rm->amb1_time+=dt) > 7.0f) {
 			rm->state = GAME_OVER_PIC;
+			rm->sounds.game_over.stop ();
 		}
 		break;
 	case GAME_OVER_PIC:
@@ -316,6 +347,11 @@ O_RENDER (rooms_render) {
 		spr->game_over.draw (&window);
 		break;
 	case WIN:
+		spr->win_5.draw (&window);
+		spr->win_6.draw (&window);
+		spr->win_am.draw (&window);
+		spr->win_black.draw (&window);
+		window.draw (rm->db.text);
 		break;
 	default:
 		break;
@@ -355,7 +391,7 @@ O_RENDER (rooms_render) {
 		rm->sprites.night.draw (&window);
 
 		rm->db.text.setString (rm->db.text.getString () + "\n" + std::to_string (int(rm->time)) + "\n" + std::to_string (int(rm->FPS)));
-		window.draw (rm->db.text);
+		//window.draw (rm->db.text);
 	}
 }
 

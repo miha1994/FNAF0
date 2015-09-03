@@ -45,6 +45,7 @@ struct sounds_rooms {
 	sound jumpscare1;
 	sound jumpscare2;
 	sound static_;
+	sound game_over;
 	sound win1;
 	sound win2;
 
@@ -73,6 +74,7 @@ struct sprites_rooms {
 	sprite win_5;
 	sprite win_6;
 	sprite win_am;
+	sprite win_black;
 };
 
 struct debug_rooms {
@@ -105,6 +107,7 @@ public:
 	int blink_count;
 	float freddy_jumpscare_count;
 	int cam_noize_count;
+	int number_of_night;
 	bool tab_sw;
 	bool was_outside_of_switch_tab;
 	bool left_button_on;

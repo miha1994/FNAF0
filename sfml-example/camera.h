@@ -9,6 +9,13 @@ struct sprites_camera {
 	sprite item_name[11];
 	sprite glitches[11];
 	std::map <int, sprite> rooms;
+	sprite room_name[11];
+	sprite turn_on_the_camera;
+};
+
+struct sounds_camera {
+	sound animatronic[26];
+	sound wait;
 };
 
 enum WATCH_STATE {
@@ -20,7 +27,11 @@ enum WATCH_STATE {
 
 struct camera_data {
 	sprites_camera sprites;
+	sounds_camera sounds;
 	v2i item_coord[11];
+	int sounds_in_room[11][3];
+	float sounds_in_room_time[3];
+	bool play[3];
 	float you_map_time;
 	float cur_item_time;
 	float dt;
@@ -29,6 +40,8 @@ struct camera_data {
 	WATCH_STATE w_s;
 	float watch_time;
 	int glitch_count;
+	float totc_time;
+	int totc_stat;
 	bool you_big;
 	bool cur_item_is_yellow;
 };

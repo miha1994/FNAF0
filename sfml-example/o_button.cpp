@@ -7,7 +7,7 @@ int night_sizes[7][2] = { {227, 97}, {231, 97}, {231, 97}, {231, 97}, {231, 97},
 
 float first_night_max_time=2.2;
 
-O_LOAD (button_load) {
+char *button_load (char *parent_space) {
 	button *btn = new button;
 	btn->state = BUTTON_STATE::MENU;
 	get_save_status(&btn->num_of_beaten_nigths);
@@ -311,7 +311,7 @@ void draw_main_menu (button *btn) {
 
 O_RENDER (button_render) {
 	O_DECL (button, btn);
-
+	int i = 0;
 	switch (btn->state) {
 	case MENU:
 		draw_main_menu (btn);
