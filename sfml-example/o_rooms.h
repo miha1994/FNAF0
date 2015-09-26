@@ -20,6 +20,10 @@ enum ROOMS_STATE {
 	TAB_TO_CAMERAS,
 	TAB_TO_OFFICE,
 	FREDDY_JUMPSCARE,
+	BONNIE_JUMPSCARE,
+	CHICA_JUMPSCARE,
+	FOXY_JUMPSCARE,
+	GOLDEN_JUMPSCARE,
 	GAME_OVER_STATIC,
 	GAME_OVER_PIC,
 	WIN
@@ -32,7 +36,7 @@ enum DOOR_STATE {
 	DOOR_STATE_CLOSED
 };
 
-#define NUM_OF_SOUNDS 12
+#define NUM_OF_SOUNDS 11
 
 struct sounds_rooms {
 	sound door;
@@ -43,7 +47,6 @@ struct sounds_rooms {
 	sound amb2;
 	sound cam_reload;
 	sound jumpscare1;
-	sound jumpscare2;
 	sound static_;
 	sound game_over;
 	sound win1;
@@ -69,12 +72,19 @@ struct sprites_rooms {
 	sprite night;
 	sprite blink;
 	sprite freddy_jumpscare[28];
+	sprite bonnie_jumpscare[10];
+	sprite chica_jumpscare[16];
+	sprite golden_jumpscare[20];
+    sprite foxy_jumpscare[14];
+	sprite golden_freddy;
 	sprite cam_noize[8];
 	sprite game_over;
 	sprite win_5;
 	sprite win_6;
 	sprite win_am;
 	sprite win_black;
+    sprite attention;
+    sprite small_att;
 };
 
 struct debug_rooms {
@@ -96,6 +106,7 @@ public:
 	DOOR_STATE right_door_state;
 	float right_door_count;
 	ROOMS_STATE state;
+	ROOMS_STATE jumpscare;
 	float tab_count;
 	int AI_level[5];
 	int fan_count;
@@ -105,9 +116,20 @@ public:
 	float in_office_time;
 	float FPS;
 	int blink_count;
-	float freddy_jumpscare_count;
+	float jumpscare_count;
+	float bonnie_time;
+	bool bonnie_checked;
+	float chica_time;
+	bool chica_checked;
+	float left_close_time;
+	float right_close_time;
 	int cam_noize_count;
 	int number_of_night;
+	float golden_last_time;
+	float golden_extra_time;
+    float foxy_time_left;
+	bool gf_blink;
+	int gf_count;
 	bool tab_sw;
 	bool was_outside_of_switch_tab;
 	bool left_button_on;

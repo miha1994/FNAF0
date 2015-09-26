@@ -1,0 +1,9 @@
+0		#amount_of_textures
+{
+	CONTROL {
+		{
+			load MENU
+			active MENU
+		}
+	}
+}

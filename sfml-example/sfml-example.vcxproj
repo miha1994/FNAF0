@@ -73,6 +73,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="cam_another_opening.cpp" />
+    <ClCompile Include="cam_init.cpp" />
+    <ClCompile Include="cam_num.cpp" />
+    <ClCompile Include="cam_upd.cpp" />
     <ClCompile Include="common_functions.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="func_pointers.cpp" />

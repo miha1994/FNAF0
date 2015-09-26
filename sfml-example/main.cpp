@@ -5,6 +5,7 @@
 int main()
 {
 	freopen ("data/inf/load.txt", "r", stdin);
+	freopen ("output.txt", "w", stdout);
 	Game *game = new Game ();
 	if (game->init (true)) {
 		while (game->running) {

@@ -17,7 +17,7 @@ int current_night = 1;
 #define GOLDEN		4
 */
 int AI_LEVELS[6][5] = {
-	{10,10,1,0,1},
+	{20,20,20,20,20},
 	{0,0,0,0,0},
 	{0,0,0,0,0},
 	{0,0,0,0,0},
@@ -47,11 +47,12 @@ O_LOAD (rooms_load) {
 	rm->FPS = 60;
 	rm->last_mlp = false;
 	rm->number_of_night = 0;
+	rm->gf_blink = false;
 
 	sprites_rooms *spr = &rm->sprites;
 	spr->dark_office.init ("assets/textures/office/304.png", 1600, 720);
 	spr->light_office.init ("assets/textures/office/39.png", 1600, 720);
-	spr->left_button_off.init ("assets/textures/office/122.png",92,247);
+	spr->left_button_off.init ("assets/textures/office/122.png", 92, 247);
 	spr->left_button_off.texture.setSmooth (false);
 	spr->fan[0].init ("assets/textures/office/57.png",138,196);
 	spr->fan[1].init ("assets/textures/office/59.png",137,196);
@@ -62,8 +63,14 @@ O_LOAD (rooms_load) {
 	spr->win_6.init ("assets/textures/inscriptions/351.png", 53, 72);
 	spr->win_am.init ("assets/textures/inscriptions/352.png", 113, 72);
 	spr->win_am.itself.setPosition (625, 312);
+    spr->attention.init ("assets/textures/foxy_game/big.png", 63, 55);
+    spr->attention.itself.setPosition (890, 656);
+    spr->small_att.init ("assets/textures/foxy_game/sml.png", 37, 32);
+    spr->small_att.itself.setPosition (918, 457);
 	spr->win_black.init ("assets/textures/wtf/327.png", 1280, 720);
 	spr->win_black.texture.setSmooth (false);
+	spr->golden_freddy.init ("assets/textures/other/573.png", 541, 521);
+	spr->golden_freddy.texture.setSmooth (false);
 	char str[50];
 	FOR (i, 14) {
 		sprintf (str, "assets/textures/office/left_door/%d.png", i);
@@ -85,6 +92,22 @@ O_LOAD (rooms_load) {
 		sprintf (str, "assets/textures/jumpscares/freddy_2/%d.png", i);
 		spr->freddy_jumpscare[i].init (str, 1600, 720);
 	}
+	FOR (i, 10) {
+		sprintf (str, "assets/textures/jumpscares/bonnie/%d.png", i);
+		spr->bonnie_jumpscare[i].init (str, 1600, 720);
+	}
+	FOR (i, 16) {
+		sprintf (str, "assets/textures/jumpscares/chica/%d.png", i);
+		spr->chica_jumpscare[i].init (str, 1600, 720);
+	}
+	FOR (i, 20) {
+		sprintf (str, "assets/textures/jumpscares/freddy_1/%d.png", i);
+		spr->golden_jumpscare[i].init (str, 1280, 720);
+	}
+    FOR (i, 14) {
+        sprintf (str, "assets/textures/jumpscares/foxy_1/%d.png", i);
+		spr->foxy_jumpscare[i].init (str, 1024, 720);
+    }
 	FOR (i, 8) {
 		sprintf (str, "assets/textures/cam_noize/%d.png", i);
 		spr->cam_noize[i].init (str, 1280, 720);
@@ -137,15 +160,13 @@ O_LOAD (rooms_load) {
 	snd->all_sounds[6] = &snd->cam_reload;
 	snd->jumpscare1.loadFromFile ("assets/snd/animatronic/XSCREAM.wav", 100);
 	snd->all_sounds[7] = &snd->jumpscare1;
-	snd->jumpscare2.loadFromFile ("assets/snd/animatronic/scream3.wav", 100);
-	snd->all_sounds[8] = &snd->jumpscare2;
 	snd->static_.loadFromFile ("assets/snd/static.wav", 100);
-	snd->all_sounds[9] = &snd->static_;
+	snd->all_sounds[8] = &snd->static_;
 	snd->game_over.loadFromFile ("assets/snd/stare.wav", 100);
 	snd->win1.loadFromFile ("assets/snd/chimes 2.wav",100);
-	snd->all_sounds[10] = &snd->win1;
+	snd->all_sounds[9] = &snd->win1;
 	snd->win2.loadFromFile ("assets/snd/CROWD_SMALL_CHIL_EC049202.wav",50);
-	snd->all_sounds[11] = &snd->win2;
+	snd->all_sounds[10] = &snd->win2;
 
 	rm->left_door_count = 0;
 	rm->left_door_state = DOOR_STATE_OPENED;
@@ -161,10 +182,21 @@ O_LOAD (rooms_load) {
 	rm->db.font.loadFromFile ("assets/fonts/arial.ttf");
 	rm->db.text.setFont (rm->db.font);
 
+	rm->bonnie_time = 0;
+	rm->bonnie_checked = true;
+	rm->chica_time = 0;
+	rm->chica_checked = true;
+	rm->left_close_time = 0.0f;
+	rm->right_close_time = 0.0f;
+
+    rm->foxy_time_left = 10000;
 	rm->was_outside_of_switch_tab = false;
 	rm->time = 0.0f;
 	rm->in_office_time = 0;
 	rm->cam_noize_count = 0;
+	rm->jumpscare = IN_OFFICE;
+	rm->golden_last_time = 0.0;
+	rm->golden_extra_time = 0.0;
 	FOR (i, 5) {
 		rm->AI_level[i] = AI_LEVELS[rm->number_of_night][i];
 	}
@@ -176,6 +208,9 @@ O_LOAD (rooms_load) {
 O_UPDATE (rooms_update) {
 	CNTRL ("rooms_update");
 	O_DECL (rooms, rm);
+    if (rm->foxy_time_left > 1000 && rm->AI_level[FOXY]) {
+        rm->foxy_time_left = 30 + (20 - rm->AI_level[FOXY]) * 5 + rand1 * (10 + (20 - rm->AI_level[FOXY]));
+    }
 
 	if (kb::isKeyPressed (kb::F)) {
 		rm->FPS = 1.f / dt;
@@ -183,7 +218,6 @@ O_UPDATE (rooms_update) {
 	if (rm->state == WIN) {
 		v2f m;
 		get_mouse_pos (m);
-		rm->db.text.setString (std::to_string (m.x) + " " + std::to_string (m.y));
 		rm->time += dt;
 		if (rm->time > 10) {
 			control *mc = (control *)main_control;
@@ -206,16 +240,22 @@ O_UPDATE (rooms_update) {
 		rm->last_mlp = mouse_left_pressed;
 		return false;
 	}
-	if (kb::isKeyPressed (kb::Num5) && rm->state != FREDDY_JUMPSCARE) {
-		dt *= 50;
+	if (rm->state != FREDDY_JUMPSCARE && rm->state != BONNIE_JUMPSCARE && rm->state != CHICA_JUMPSCARE && rm->state != GOLDEN_JUMPSCARE) {
+		if (kb::isKeyPressed (kb::Num5)) {
+			dt *= 50;
+		}
+		if (kb::isKeyPressed (kb::Num0)) {
+			dt *= 10;
+		}
+		if (kb::isKeyPressed (kb::Num3)) {
+			dt *= 3;
+		}
 	}
-	if (kb::isKeyPressed (kb::Num0) && rm->state != FREDDY_JUMPSCARE) {
-		dt *= 10;
-	}
-	if (kb::isKeyPressed (kb::Num3) && rm->state != FREDDY_JUMPSCARE) {
-		dt *= 3;
-	}
+    if (kb::isKeyPressed (kb::S)) {
+        dt /= 3;   
+    }
 	rm->time += dt;
+    rm->foxy_time_left -= dt;
 	if (rm->state == CAMERAS ||
 		rm->state == IN_OFFICE ||
 		rm->state == TAB_TO_CAMERAS ||
@@ -276,7 +316,7 @@ O_UPDATE (rooms_update) {
 		}
 		break;
 	case FREDDY_JUMPSCARE:
-		if ((rm->freddy_jumpscare_count += dt*25) >= 28) {
+		if ((rm->jumpscare_count += dt*25) >= 28) {
 			rm->state = GAME_OVER_STATIC;
 			stop_all_sounds(rm);
 			rm->sounds.game_over.play ();
@@ -288,8 +328,66 @@ O_UPDATE (rooms_update) {
 		} else if (rm->x_shift < 0) {
 			rm->x_shift = 0;
 		}
-		rm->sprites.freddy_jumpscare[float_in_range(rm->freddy_jumpscare_count,0,27)].itself.setPosition(-rm->x_shift, 0);
+		rm->sprites.freddy_jumpscare[float_in_range(rm->jumpscare_count,0,27)].itself.setPosition(-rm->x_shift, 0);
 		break;
+	case BONNIE_JUMPSCARE:
+		if ((rm->jumpscare_count += dt*25) >= 20) {
+			rm->state = GAME_OVER_STATIC;
+			stop_all_sounds (rm);
+			rm->sounds.game_over.play ();
+			rm->amb1_time = 0;
+		}
+		rm->x_shift += dt * speed_of_camera_movement (m.x);
+		if (rm->x_shift > 320) {
+			rm->x_shift = 320;
+		} else if (rm->x_shift < 0) {
+			rm->x_shift = 0;
+		}
+		rm->sprites.bonnie_jumpscare[float_in_range(rm->jumpscare_count,0,19)%10].itself.setPosition(-rm->x_shift, 0);
+		break;
+	case CHICA_JUMPSCARE:
+		if ((rm->jumpscare_count += dt*25) >= 32) {
+			rm->state = GAME_OVER_STATIC;
+			stop_all_sounds (rm);
+			rm->sounds.game_over.play ();
+			rm->amb1_time = 0;
+		}
+		rm->x_shift += dt * speed_of_camera_movement (m.x);
+		if (rm->x_shift > 320) {
+			rm->x_shift = 320;
+		} else if (rm->x_shift < 0) {
+			rm->x_shift = 0;
+		}
+		rm->sprites.chica_jumpscare[float_in_range(rm->jumpscare_count,0,31)%16].itself.setPosition(-rm->x_shift, 0);
+		break;
+	case GOLDEN_JUMPSCARE:
+		if ((rm->jumpscare_count += dt*25) >= 20) {
+			rm->state = GAME_OVER_STATIC;
+			stop_all_sounds (rm);
+			rm->sounds.game_over.play ();
+			rm->amb1_time = 0;
+		}
+		rm->x_shift = 0;
+		rm->sprites.golden_jumpscare[float_in_range(rm->jumpscare_count,0,19)].itself.setPosition(0, 0);
+		break;
+    case FOXY_JUMPSCARE:
+        if ((rm->jumpscare_count += dt*25) >= 14) {
+			rm->state = GAME_OVER_STATIC;
+			stop_all_sounds (rm);
+			rm->sounds.game_over.play ();
+			rm->amb1_time = 0;
+		}
+        if (rm->jumpscare == IN_OFFICE) {
+            rm->x_shift += dt * speed_of_camera_movement (m.x);
+		    if (rm->x_shift > 320) {
+			    rm->x_shift = 320;
+		    } else if (rm->x_shift < 0) {
+			    rm->x_shift = 0;
+		    }
+        }
+        rm->sprites.foxy_jumpscare[float_in_range(rm->jumpscare_count,0,13)].itself.setPosition(0, 0);
+        rm->sprites.foxy_jumpscare[float_in_range(rm->jumpscare_count,0,13)].itself.setScale (1280 / 1024.0, 1);
+        break;
 	case GAME_OVER_STATIC:
 		if ((rm->amb1_time+=dt) > 7.0f) {
 			rm->state = GAME_OVER_PIC;
@@ -317,6 +415,7 @@ O_RENDER (rooms_render) {
 	sprites_rooms *spr = &rm->sprites;
 
 	bool render_std = false;
+	int tmp;
 	switch (rm->state) {
 	case IN_OFFICE:
 		office_render (rm);
@@ -337,8 +436,41 @@ O_RENDER (rooms_render) {
 		render_std = true;
 		break;
 	case FREDDY_JUMPSCARE:
-		rm->sprites.freddy_jumpscare[float_in_range(rm->freddy_jumpscare_count,0,27)].draw (&window);
+		rm->sprites.freddy_jumpscare[float_in_range(rm->jumpscare_count,0,27)].draw (&window);
 		break;
+	case BONNIE_JUMPSCARE:
+		tmp = float_in_range(rm->jumpscare_count,0,19);
+		rm->sprites.bonnie_jumpscare[tmp%10].draw (&window);
+		if (tmp < 5) {
+			spr->blink.itself.setColor (sf::Color (255,255,255, 255 - tmp * 50));
+			spr->blink.draw (&window);
+		}
+		break;
+	case CHICA_JUMPSCARE:
+		tmp = float_in_range(rm->jumpscare_count,0,31);
+		rm->sprites.chica_jumpscare[tmp%16].draw (&window);
+		if (tmp < 5) {
+			spr->blink.itself.setColor (sf::Color (255,255,255, 255 - tmp * 50));
+			spr->blink.draw (&window);
+		}
+		break;
+	case GOLDEN_JUMPSCARE:
+		tmp = float_in_range(rm->jumpscare_count,0,19);
+		rm->sprites.golden_jumpscare[tmp].draw (&window);
+		if (tmp < 5) {
+			spr->blink.itself.setColor (sf::Color (255,255,255, 255 - tmp * 50));
+			spr->blink.draw (&window);
+		}
+		break;
+    case FOXY_JUMPSCARE:
+        if (rm->jumpscare == IN_OFFICE) {
+            office_render (rm);
+        } else if (rm->jumpscare == CAMERAS) {
+            camera_render (rm);
+        }
+        tmp = float_in_range(rm->jumpscare_count, 0, 13);
+        rm->sprites.foxy_jumpscare[tmp].draw (&window);
+        break;
 	case GAME_OVER_STATIC:
 		spr->cam_noize[rm->cam_noize_count].itself.setColor (sf::Color::White);
 		spr->cam_noize[rm->cam_noize_count].draw (&window);
@@ -351,7 +483,6 @@ O_RENDER (rooms_render) {
 		spr->win_6.draw (&window);
 		spr->win_am.draw (&window);
 		spr->win_black.draw (&window);
-		window.draw (rm->db.text);
 		break;
 	default:
 		break;
@@ -361,11 +492,18 @@ O_RENDER (rooms_render) {
 		sprites_rooms *spr = &rm->sprites;
 
 		if (rm->blink_count) {
-			if (rm->blink_count == 3 && am > 5) {
-				rm->state = WIN;
-				stop_all_sounds (rm);
-				rm->time = 0;
-				rm->sounds.win1.play ();
+			if (rm->blink_count == 3) {
+				if (am > 5) {
+					rm->state = WIN;
+					stop_all_sounds (rm);
+					rm->time = 0;
+					rm->sounds.win1.play ();
+				}
+				if (rm->jumpscare != IN_OFFICE) {
+					rm->state = rm->jumpscare;
+					rm->jumpscare_count = 0;
+					rm->sounds.jumpscare1.play ();
+				}
 			}
 			float force = fabs (float(3) - rm->blink_count);
 			spr->blink.itself.setColor (sf::Color (255,255,255,255 - force * 85));
@@ -391,8 +529,13 @@ O_RENDER (rooms_render) {
 		rm->sprites.night.draw (&window);
 
 		rm->db.text.setString (rm->db.text.getString () + "\n" + std::to_string (int(rm->time)) + "\n" + std::to_string (int(rm->FPS)));
-		//window.draw (rm->db.text);
 	}
+    /*
+    v2i m;
+    get_mouse_pos (m);
+    rm->db.text.setString (std::to_string (m.x) + " " + std::to_string (m.y));
+    window.draw (rm->db.text);
+    */
 }
 
 O_DEL (rooms_del) {

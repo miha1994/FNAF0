@@ -1,0 +1,10 @@
+0		#number_of_textures
+{
+	ROOMS {
+		6	#AI_0
+		0	#AI_1
+		1	#AI_2
+		0	#AI_3
+		1	#AI_4
+	}
+}
