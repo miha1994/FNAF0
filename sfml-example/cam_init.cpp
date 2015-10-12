@@ -67,6 +67,18 @@ void camera_init (rooms *rm) {
 	spr->info[4].itself.setPosition (570 - 527/2.0f, 12);
     spr->info[5].init ("assets/textures/wtf/0.png", 319, 27);
     spr->info[5].itself.setPosition (640 - (319.0/2), 10);
+	{
+		int px = 570 - 527/2.0f - 110, py = 360 - 115;
+		for (int i = 6; i < 14; ++i) {
+			sprintf (str, "assets/textures/inscriptions/info/info%d.png", i);
+			spr->info[i].init (str, i < 8 ? 540 : 519, i < 8 ? 230 : 200);
+			spr->info[i].itself.setPosition (px, py);
+			if (i == 7) {
+				px = 180;
+				py = 260;
+			}
+		}
+	}
 
     spr->field.init ("assets/textures/foxy_game/field.png", 640, 320);
     spr->field.itself.setPosition (110, 174);
@@ -78,6 +90,7 @@ void camera_init (rooms *rm) {
     spr->v[1].itself.setPosition (110, 174 + 320 + 90);
 	spr->correct.init ("assets/textures/foxy_game/correct.png", 407, 83);
 	spr->correct.itself.setPosition (380, 350-56);
+	spr->dark.init ("assets/textures/camera/dark.png", 1280, 200);
 	FOR (i, 6) {
 		sprintf(str, "assets/textures/foxy_game/time%d.png", i);
 		spr->time[i].init (str, 300, 140);

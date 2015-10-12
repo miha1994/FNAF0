@@ -8,6 +8,7 @@
 #include "camera.h"
 
 extern int night_sizes[7][2];
+extern int Ch_Nght;
 int current_night = 1;
 /*
 #define BONNIE		0
@@ -16,13 +17,14 @@ int current_night = 1;
 #define FOXY		3
 #define GOLDEN		4
 */
-int AI_LEVELS[6][5] = {
-	{20,20,20,20,20},
-	{0,0,0,0,0},
-	{0,0,0,0,0},
-	{0,0,0,0,0},
-	{0,0,0,0,0},
-	{0,0,0,0,0}
+int AI_LEVELS[7][5] = {
+	{ 0, 0, 1, 1, 1},
+	{10,10, 1, 3,15},
+	{20,20, 1, 8,16},
+	{ 0, 0,20, 4,17},
+	{20,20,10, 6,18},
+	{20,20,12,12,19},
+	{20,20,20,20,20}
 };
 
 int float_in_range (float v, int min, int max) {
@@ -34,9 +36,10 @@ void stop_all_sounds(rooms *rm) {
 	FOR (i, NUM_OF_SOUNDS) {
 		rm->sounds.all_sounds[i]->stop ();
 	}
-	FOR (i, 21) {
+	FOR (i, 26) {
 		rm->cam->sounds.animatronic[i].stop ();
 	}
+	rm->cam->sounds.wait.stop ();
 }
 
 O_LOAD (rooms_load) {
@@ -46,7 +49,7 @@ O_LOAD (rooms_load) {
 	rm->state = IN_OFFICE;
 	rm->FPS = 60;
 	rm->last_mlp = false;
-	rm->number_of_night = 0;
+	rm->number_of_night = Ch_Nght;
 	rm->gf_blink = false;
 
 	sprites_rooms *spr = &rm->sprites;
@@ -113,7 +116,7 @@ O_LOAD (rooms_load) {
 		spr->cam_noize[i].init (str, 1280, 720);
 	}
 	
-		sprintf (str, "assets/textures/inscriptions/nights/%d.png", current_night);
+		sprintf (str, "assets/textures/inscriptions/nights/%d.png", rm->number_of_night);
 		sprite *s = &spr->night;
 		s->texture.loadFromFile (str);
 		s->itself.setTexture (s->texture);
@@ -138,6 +141,10 @@ O_LOAD (rooms_load) {
 	
 	spr->right_button_on.init ("assets/textures/office/135.png",92,247);
 	spr->right_button_on.texture.setSmooth (false);
+	FOR (i, 3) {
+		sprintf (str, "assets/textures/ending/%d.png", i);
+		spr->congr[i].init (str, 1280, 720);
+	}
 	rm->cam = new camera_data;
 	camera_init (rm);
 
@@ -197,8 +204,9 @@ O_LOAD (rooms_load) {
 	rm->jumpscare = IN_OFFICE;
 	rm->golden_last_time = 0.0;
 	rm->golden_extra_time = 0.0;
+	rm->AI_lev = 0;
 	FOR (i, 5) {
-		rm->AI_level[i] = AI_LEVELS[rm->number_of_night][i];
+		rm->AI_lev += (rm->AI_level[i] = AI_LEVELS[rm->number_of_night-1][i])/5.0;
 	}
 
 	read_string ();
@@ -220,10 +228,19 @@ O_UPDATE (rooms_update) {
 		get_mouse_pos (m);
 		rm->time += dt;
 		if (rm->time > 10) {
-			control *mc = (control *)main_control;
-			mc->todo.push_back (instruction ("delete", "L0"));
-			mc->todo.push_back (instruction ("load", "MENU"));
-			mc->todo.push_back (instruction ("active", "MENU"));
+			if (rm->number_of_night > 4) {
+				rm->sounds.win1.stop ();
+				rm->cam->sounds.animatronic[1].setVolume (50);
+				rm->cam->sounds.animatronic[1].play ();
+				rm->state = CONGRATS;
+				rm->time = 0;
+				return false;
+			} else {
+				control *mc = (control *)main_control;
+				mc->todo.push_back (instruction ("delete", "L0"));
+				mc->todo.push_back (instruction ("load", "MENU"));
+				mc->todo.push_back (instruction ("active", "MENU"));
+			}
 		}
 		if (rm->time > 4.0f && rm->time < 5.0f && rm->sounds.win2.snd[0].getStatus () != sf::Sound::Playing) {
 			rm->sounds.win2.play ();
@@ -238,22 +255,26 @@ O_UPDATE (rooms_update) {
 			rm->sprites.win_6.itself.setPosition (530, 312);
 		}
 		rm->last_mlp = mouse_left_pressed;
+		if (rm->blink_count != 12345678) {
+			rm->blink_count = 12345678;
+			int n;
+			get_save_status (&n);
+			if (rm->number_of_night > n) {
+				set_save_status (rm->number_of_night);
+			}
+		}
 		return false;
 	}
-	if (rm->state != FREDDY_JUMPSCARE && rm->state != BONNIE_JUMPSCARE && rm->state != CHICA_JUMPSCARE && rm->state != GOLDEN_JUMPSCARE) {
-		if (kb::isKeyPressed (kb::Num5)) {
-			dt *= 50;
+	if (rm->state == CONGRATS) {
+		rm->time += dt;
+		if (rm->time > 20) {
+			control *mc = (control *)main_control;
+			mc->todo.push_back (instruction ("delete", "L0"));
+			mc->todo.push_back (instruction ("load", "MENU"));
+			mc->todo.push_back (instruction ("active", "MENU"));
 		}
-		if (kb::isKeyPressed (kb::Num0)) {
-			dt *= 10;
-		}
-		if (kb::isKeyPressed (kb::Num3)) {
-			dt *= 3;
-		}
+		return false;
 	}
-    if (kb::isKeyPressed (kb::S)) {
-        dt /= 3;   
-    }
 	rm->time += dt;
     rm->foxy_time_left -= dt;
 	if (rm->state == CAMERAS ||
@@ -483,7 +504,21 @@ O_RENDER (rooms_render) {
 		spr->win_6.draw (&window);
 		spr->win_am.draw (&window);
 		spr->win_black.draw (&window);
+		if (rm->time > 9) {
+			spr->blink.itself.setColor (sf::Color (255,255,255, std::min(rm->time-9.0, 1.0) * 255));
+			spr->blink.draw (&window);
+		}
 		break;
+	case CONGRATS:
+		spr->congr[rm->number_of_night - 5].draw (&window);
+		if (rm->time < 1) {
+			spr->blink.itself.setColor (sf::Color (255,255,255, (1 - rm->time) * 255));
+			spr->blink.draw (&window);
+		}
+		if (rm->time > 19) {
+			spr->blink.itself.setColor (sf::Color (255,255,255, std::min(rm->time-19.0, 1.0) * 255));
+			spr->blink.draw (&window);
+		}
 	default:
 		break;
 	}
@@ -493,7 +528,7 @@ O_RENDER (rooms_render) {
 
 		if (rm->blink_count) {
 			if (rm->blink_count == 3) {
-				if (am > 5) {
+				if (am >= 6) {
 					rm->state = WIN;
 					stop_all_sounds (rm);
 					rm->time = 0;

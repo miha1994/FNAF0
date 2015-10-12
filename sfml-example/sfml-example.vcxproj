@@ -121,6 +121,9 @@
     <Text Include="..\Release\assets\inf\menu.txt" />
     <Text Include="..\Release\assets\inf\output.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="fnaf0.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

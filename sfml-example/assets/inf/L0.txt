@@ -1,5 +1,0 @@
-0		#number_of_textures
-{
-	ROOMS {
-	}
-}

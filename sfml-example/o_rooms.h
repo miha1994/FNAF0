@@ -26,7 +26,8 @@ enum ROOMS_STATE {
 	GOLDEN_JUMPSCARE,
 	GAME_OVER_STATIC,
 	GAME_OVER_PIC,
-	WIN
+	WIN,
+	CONGRATS
 };
 
 enum DOOR_STATE {
@@ -85,6 +86,7 @@ struct sprites_rooms {
 	sprite win_black;
     sprite attention;
     sprite small_att;
+	sprite congr[3];
 };
 
 struct debug_rooms {
@@ -121,10 +123,13 @@ public:
 	bool bonnie_checked;
 	float chica_time;
 	bool chica_checked;
+	float freddy_time;
+	bool freddy_checked;
 	float left_close_time;
 	float right_close_time;
 	int cam_noize_count;
 	int number_of_night;
+	float AI_lev;
 	float golden_last_time;
 	float golden_extra_time;
     float foxy_time_left;

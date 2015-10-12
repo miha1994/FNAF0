@@ -5,11 +5,16 @@
 
 bool Game::init (bool fullscreen) {
 	std::vector <sf::VideoMode> f_modes = sf::VideoMode::getFullscreenModes ();
-	R_WIND_WIDTH = f_modes[0].width;
-	R_WIND_HEIGHT = f_modes[0].height;
+	if (f_modes[0].width > MY_WIND_WIDTH && f_modes[0].height > MY_WIND_HEIGHT) {
+		R_WIND_WIDTH = MY_WIND_WIDTH;//f_modes[0].width;
+		R_WIND_HEIGHT = MY_WIND_HEIGHT;//f_modes[0].height;
+	} else {
+		R_WIND_WIDTH = f_modes[0].width;
+		R_WIND_HEIGHT = f_modes[0].height;
+	}
 	X_FACTOR = float (R_WIND_WIDTH) / float (MY_WIND_WIDTH);
 	Y_FACTOR = float (R_WIND_HEIGHT) / float (MY_WIND_HEIGHT);
-	window.create (f_modes[0], "Five Nights at Freddy's 0", fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+	window.create (sf::VideoMode (R_WIND_WIDTH, R_WIND_HEIGHT), "Five Nights at Freddy's 0", fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
 	window.setVerticalSyncEnabled (true);
 	window.setFramerateLimit (60);
 	min_type_info["CONTROL"]	= my_type_info (0, 0);

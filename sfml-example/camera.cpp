@@ -16,13 +16,13 @@ int array_names_of_rooms[11][3] = {
 	{78, 151, 26},
 	{70, 261, 28}
 };
-float volumes[26][2] = {{0,0.7f}, {0,1}, {0,1.2f}, 
+float volumes[26][2] = {{0,2.7f}, {0,3}, {0,4.2f}, 
 {0,10},{25,12},{10,10},
-{0,3},{0,3},{0,20},
+{0,6},{0,7},{0,40},
+{10,10},{2,5},{2,5},{2,5},
 {10,10},{10,10},{10,10},{10,10},
 {10,10},{10,10},{10,10},{10,10},
-{10,10},{10,10},{10,10},{10,10},
-{0,1}, {0,1}, {0,1}, {0,1},{0,1}
+{0,4.6}, {0,4.6}, {0,4.6}, {0,4.6},{0,4.6}
 };
 int num_of_pic_for_room_watch[11];
 
@@ -45,11 +45,13 @@ void camera_render (rooms *rm) {
 		ls->itself.setPosition (-cam->shift, 0);
 	}
 	ls->draw (&window);
+	bool hint_vis;
     if (cam->cur == 0 || cam->cur == 2) {
         v2f m;
         get_mouse_pos (m);
         int x = (m.x / 1280)*6;
         int y = (m.y / 720)*6;
+		hint_vis = !(x < 4 && y > 1 && y < 4);
         FOR (i, 6) {
             FOR (j, 6) {
                 if (i != x || j != y) {
@@ -108,7 +110,7 @@ void camera_render (rooms *rm) {
 	cspr->room_name[cam->cur].draw (&window);
 	if (!cam->totc_stat && cam->cur < 9 && cam->cur > 3) {
 		cspr->turn_on_the_camera.draw (&window);
-		if (cam->cur != 10) {
+		if (cam->cur != 10 && cam->cur != 7 && rm->number_of_night == 1) {
 			cspr->info[0].draw (&window);
 		}
 	} else {
@@ -116,14 +118,36 @@ void camera_render (rooms *rm) {
 			cspr->camera_disabled_audio_only.draw (&window);
 		}
 	}
-	if (cam->totc_stat == 2) {
-		if (cam->cur < 2) {
-			cspr->info[1].draw (&window);
-		} else if (cam->cur < 4) {
-			cspr->info[2].draw (&window);
-		} else if (cam->cur != 10) {
+	if (rm->number_of_night > 1 && rm->number_of_night < 4) {
+		if (cam->totc_stat == 0 && cam->cur != 10 && cam->cur != 7 && cam->cur > 3) {
+			cspr->info[8].draw(&window);
+		}
+		int loc_a[4] = {9,6,10,7};
+		if (cam->cur < 4) {
+			if (!(cam->cur & 1)) {
+				cspr->info[loc_a[cam->cur]].itself.setColor (sf::Color (255,255,255, hint_vis ? 255 : 100));
+			}
+			cspr->info[loc_a[cam->cur]].draw (&window);
+		}
+	} else if (rm->number_of_night == 4 || rm->number_of_night == 5) {
+		if (cam->cur > 3 && cam->cur < 7) {
+			cspr->info[11].draw (&window);
+		} else if (cam->cur > 7 && cam->cur < 10) {
+			cspr->info[12].draw (&window);
+		} else if (cam->cur == 7 && rm->number_of_night == 5) {
+			cspr->info[13].draw (&window);
+		}
+	}
+	if (cam->totc_stat == 2 && rm->number_of_night < 4) {
+		if (cam->cur != 10 && cam->cur != 7) {
 			cspr->info[3].draw (&window);
 		}
+	}
+	if (1);
+	int st_o = -((int(rm->time*100))%200);
+	FOR (i, 5) {
+		cspr->dark.itself.setPosition (0, st_o + i * 200);
+		cspr->dark.draw (&window);
 	}
 	if (rm->was_outside_of_switch_tab) {
 		spr->switcher_to_camera.draw (&window);
@@ -132,10 +156,10 @@ void camera_render (rooms *rm) {
 		cspr->glitches[rand()%11].draw (&window);
 	}
 
-    /*
-    v2i m;
-    get_mouse_pos (m);
-    rm->db.text.setString (std::to_string (m.x) + " " + std::to_string (m.y));
+    //v2i m;
+    //get_mouse_pos (m);
+	/*
+    rm->db.text.setString (std::to_string (cam->cur) + " " + std::to_string (0));
     window.draw (rm->db.text);
-    */
+	*/
 }

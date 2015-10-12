@@ -2,7 +2,7 @@
 
 void camera_another_opening (rooms *rm) {
 	//FREDDY
-	if (rm->time > 180 + (20 - rm->AI_level[FREDDY])*18) {
+	if (rm->time > (20 - rm->AI_level[FREDDY])*18 && rand1 > 0.3) {
 		freddy_room = ___tmp____[rand()%5];
 	} else {
 		freddy_room = 7;
@@ -28,8 +28,8 @@ void camera_another_opening (rooms *rm) {
 				if (rm->AI_level[BONNIE] < 5 && rm->time < 150) {
 					bon_r = 2;
 				} else {
-				    bon_r = 1;
-                }
+					bon_r = 1;
+				}
 			}
 		} while (0);
 
@@ -97,6 +97,9 @@ void camera_another_opening (rooms *rm) {
 		sir[9][2] = 13 + rand () % 2;
 		sir[9][1] = 15 + rand () % 2;
 	}
+	if (freddy_room != 7) {
+		sir[freddy_room][0] = 10 + rand() % 3;
+	}
 	int ai_sum = 0;
 	int ai_max = 0;
 	FOR (i, 5) {
@@ -138,6 +141,10 @@ void camera_another_opening (rooms *rm) {
 				}
 			}
 		}
+	}
+	FOR (j, 3) {
+		sir[0][j] = -1;
+		sir[2][j] = -1;
 	}
 
 #undef sir

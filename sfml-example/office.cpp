@@ -7,12 +7,13 @@ void office_update (float dt, rooms *rm, v2f m) {
 	rm->in_office_time += dt;
 	rm->bonnie_time -= dt;
 	rm->chica_time -= dt;
+	rm->freddy_time -= dt;
 	rm->light_in_office = kb::isKeyPressed (kb::LControl) || kb::isKeyPressed (kb::RControl);
 	if (rm->light_in_office) {
 		if (rm->sounds.light_in_office.snd[0].getStatus() != sf::Sound::Playing) {
 			rm->sounds.light_in_office.play ();
 		}
-		if (!rm->gf_blink && (rm->time - rm->golden_last_time + rm->golden_extra_time > 32 + (20 - rm->AI_level[GOLDEN])*8)) {
+		if (!rm->gf_blink && (rm->time - rm->golden_last_time + rm->golden_extra_time > 4.5 + (20 - rm->AI_level[GOLDEN])*8)) {
 			rm->gf_blink = true;
 			rm->gf_count = 0;
 		}
@@ -46,7 +47,7 @@ void office_update (float dt, rooms *rm, v2f m) {
 			rm->light_in_office = false;
 			rm->in_office_time = 0;
 			if (!rm->bonnie_checked) {
-				if (bonnie_room != 7) {
+				if (bonnie_room != 7 && freddy_room == 7) {
 					if (!(bool(bonnie_room < 2) ^ bool (rm->left_close_time < 3))) {
 						rm->jumpscare = BONNIE_JUMPSCARE;
 					}
@@ -54,12 +55,27 @@ void office_update (float dt, rooms *rm, v2f m) {
 				rm->bonnie_checked = true;
 			}
 			if (!rm->chica_checked) {
-				if (chica_room != 7) {
+				if (chica_room != 7 && freddy_room == 7) {
 					if (!(bool(chica_room < 4) ^ bool (rm->right_close_time < 3))) {
 						rm->jumpscare = CHICA_JUMPSCARE;
 					}
 				}
 				rm->bonnie_checked = true;
+			}
+			if (!rm->freddy_checked) {
+				if (freddy_room != 7) {
+					bool jmp = false;
+					if (freddy_room < 7 && (rm->left_close_time < 3 || rm->right_close_time > 2)) {
+						jmp = true;
+					}
+					if (freddy_room > 7 && (rm->right_close_time < 3 || rm->left_close_time > 2)) {
+						jmp = true;
+					}
+					if (jmp) {
+						rm->jumpscare = FREDDY_JUMPSCARE;
+					}
+				}
+				rm->freddy_checked = true;
 			}
 			return;
 		}
@@ -67,13 +83,13 @@ void office_update (float dt, rooms *rm, v2f m) {
 		rm->was_outside_of_switch_tab = true;
 	}
 	if (rm->blink_count == 2) {
-		if (rm->in_office_time > 100 - 4.2f * rm->AI_level[FREDDY]) {
+		if (rm->in_office_time > 50 - 2.0f * rm->AI_lev) {
 			rm->state = FREDDY_JUMPSCARE;
 			rm->jumpscare_count = 0;
 			rm->sounds.jumpscare1.play ();
 		}
 		if (!rm->bonnie_checked && rm->bonnie_time < 0) {
-			if (bonnie_room != 7) {
+			if (bonnie_room != 7 && freddy_room == 7) {
 				if (!(bool(bonnie_room < 2) ^ bool (rm->left_close_time < 3))) {
 					rm->state = BONNIE_JUMPSCARE;
 					rm->jumpscare_count = 0;
@@ -83,7 +99,7 @@ void office_update (float dt, rooms *rm, v2f m) {
 			rm->bonnie_checked = true;
 		}
 		if (!rm->chica_checked && rm->chica_time < 0) {
-			if (chica_room != 7) {
+			if (chica_room != 7 && freddy_room == 7) {
 				if (!(bool(chica_room < 4) ^ bool (rm->right_close_time < 3))) {
 					rm->state = CHICA_JUMPSCARE;
 					rm->jumpscare_count = 0;
@@ -91,6 +107,23 @@ void office_update (float dt, rooms *rm, v2f m) {
 				}
 			}
 			rm->bonnie_checked = true;
+		}
+		if (!rm->freddy_checked && rm->freddy_time < 0) {
+			if (freddy_room != 7) {
+				bool jmp = false;
+				if (freddy_room < 7 && (rm->left_close_time < 3 || rm->right_close_time > 2)) {
+					jmp = true;
+				}
+				if (freddy_room > 7 && (rm->right_close_time < 3 || rm->left_close_time > 2)) {
+					jmp = true;
+				}
+				if (jmp) {
+					rm->state = FREDDY_JUMPSCARE;
+					rm->jumpscare_count = 0;
+					rm->sounds.jumpscare1.play ();
+				}
+			}
+			rm->freddy_checked = true;
 		}
 	}
 	m.x += rm->x_shift;
@@ -182,7 +215,7 @@ void office_update (float dt, rooms *rm, v2f m) {
 		rm->right_button_on = true;
 		break;
 	}
-	if (rm->time - rm->golden_last_time + rm->golden_extra_time > 60 + (20 - rm->AI_level[GOLDEN])*15) {
+	if (rm->time - rm->golden_last_time + rm->golden_extra_time > 30 + (20 - rm->AI_level[GOLDEN])*16) {
 		rm->state = GOLDEN_JUMPSCARE;
 		rm->jumpscare_count = 0;
 		rm->sounds.jumpscare1.play ();

@@ -13,6 +13,8 @@ void camera_update (float dt, rooms *rm, v2f m) {
 	rm->bonnie_checked = false;
 	rm->chica_time = 8.5f;
 	rm->chica_checked = false;
+	rm->freddy_time = 7.0f;
+	rm->freddy_checked = false;
 	rm->left_close_time = 0.0f;
 	rm->right_close_time = 0.0f;
 	if ((cam->you_map_time -= dt) < 0) {
@@ -65,11 +67,12 @@ void camera_update (float dt, rooms *rm, v2f m) {
     if (rm->foxy_time_left < (rm->AI_level[FOXY] > 3 ? 10 : 25) && cam->cur == 10) {
         rm->foxy_time_left = 10000;
         foxy_game *fg = &cam->fg;
+		fg->great = false;
         fg->is_on = true;
         fg->T[0] = rand()%2;
         fg->T[1] = !fg->T[0];
         fg->number_of_T0_squares = int((rm->AI_level[FOXY]+6) / 2) + rand()%4;
-		fg->tta5 = (fg->time_to_answer = (20 - rm->AI_level[FOXY]) * (3.5f/ 20) + 0.5f + fg->number_of_T0_squares * 0.64) / 6;
+		fg->tta5 = (fg->time_to_answer = ((((20 - rm->AI_level[FOXY])/20.0f)*0.3f + (rm->number_of_night == 1 ? 0.7f : 0)) * (3.5f) + 0.5f + (rm->AI_level[FOXY] > 16 ? 0.3 : 0) + fg->number_of_T0_squares * 0.64)*3.3) / 6;
         int n32[32];
         FOR (i, 32) {
             n32[i] = i;
@@ -85,6 +88,9 @@ void camera_update (float dt, rooms *rm, v2f m) {
             n32[ch] = n32[--l];
         }
     }
+	if (cam->cur == 7) {
+		cam->totc_stat = 2;
+	}
 	if (mouse_left_pressed) {
 		if (cam->fg.is_on) {
 			bool good;
@@ -124,12 +130,13 @@ void camera_update (float dt, rooms *rm, v2f m) {
 						rm->jumpscare_count = 0;
 						rm->sounds.jumpscare1.play ();
 						rm->sounds.cam_reload.play ();
-					} 
+					}
 					cam->cur_item_time = 0.0;
 					cam->cur_item_is_yellow = false;
 					cam->cur = i;
 					rm->sounds.cam_reload.play ();
 					cam->glitch_count = 5;
+					
 					rm->cam->sounds_in_room_time[0] = -2.0 - rand1;
 					rm->cam->sounds_in_room_time[1] = - rand1*2;
 					rm->cam->sounds_in_room_time[2] = -3.0 - rand1;
@@ -139,8 +146,8 @@ void camera_update (float dt, rooms *rm, v2f m) {
 					FOR (z, 3) {
 						rm->cam->play[z] = false;
 					}
-					cam->totc_time = 0.0f;
 					cam->totc_stat = 0;
+					cam->totc_time = 0.0f;
 					rm->sounds.static_.stop ();
 				}
 				break;
@@ -190,7 +197,7 @@ void camera_update (float dt, rooms *rm, v2f m) {
 	}
 	//rm->db.text.setString (std::to_string (int(cam->cur)));
 	rm->db.text.setString (std::to_string (int(m.x)) + ", " + std::to_string (int(m.y)));
-	if (rm->time - rm->golden_last_time + rm->golden_extra_time > 60 + (20 - rm->AI_level[GOLDEN])*15) {
+	if (rm->time - rm->golden_last_time + rm->golden_extra_time > 30 + (20 - rm->AI_level[GOLDEN])*16) {
 		rm->state = GOLDEN_JUMPSCARE;
 		rm->jumpscare_count = 0;
 		rm->sounds.jumpscare1.play ();

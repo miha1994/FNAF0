@@ -2,8 +2,8 @@
 {
 	CONTROL {
 		{
-			load L0
-			active L0
+			load MENU
+			active MENU
 		}
 	}
 }

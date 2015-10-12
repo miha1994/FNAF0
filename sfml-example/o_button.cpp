@@ -10,23 +10,29 @@ float first_night_max_time=2.2;
 char *button_load (char *parent_space) {
 	button *btn = new button;
 	btn->state = BUTTON_STATE::MENU;
-	get_save_status(&btn->num_of_beaten_nigths);
+    FOR (i, 8) {
+        if (kb::isKeyPressed (kb::Key(int(kb::Num0) + i))) {
+		    set_save_status (i);
+            break;
+	    }
+    }
+    get_save_status(&btn->num_of_beaten_nigths);
 	btn->active_but = 1;
 	get_mouse_pos (btn->prev_m_pos);
 	btn->prev_down = false;
 	btn->prev_up = false;
 	char str[50];
 	sprites_button *spr = &btn->sprites;
-	FOR (i,4) {
+	FOR (i, 4) {
 		sprintf (str, "assets/textures/menu/%d.png", i);
 		spr->background[i].init (str, 1280, 720);
 	}
-	FOR (i,11) {
+	FOR (i, 11) {
 		sprintf (str, "assets/textures/cam_glitches/%d.png", i);
 		spr->glitches[i].init (str, 1280, 720);
 		spr->glitches[i].itself.setColor (sf::Color (255,255,255,80));
 	}
-	FOR (i,8) {
+	FOR (i, 8) {
 		sprintf (str, "assets/textures/cam_noize/%d.png", i);
 		spr->noize[i].init (str, 1280, 720);
 		spr->noize[i].itself.setColor (sf::Color (255,255,255,255));
@@ -38,23 +44,30 @@ char *button_load (char *parent_space) {
 		s->texture.setSmooth (true);
 		s->itself.setTexture (s->texture);
 		s->itself.setTextureRect (sf::Rect<int> (0,63,night_sizes[i][0],night_sizes[i][1] - 63));
-		s->itself.setPosition (120, 487);
+		s->itself.setPosition (120, 517);
 		s->itself.setScale (0.5, 0.5);
 	}
+	spr->star.init ("assets/textures/wtf/star.png", 58, 54);
 	spr->title.init ("assets/textures/inscriptions/444.png", 201, 259);
 	spr->title.itself.setPosition (120, 67);
 
 	spr->new_game.init ("assets/textures/inscriptions/448.png", 203, 33);
-	spr->new_game.itself.setPosition (120, 385);
+	spr->new_game.itself.setPosition (120, 415);
 
 	spr->continue_.init ("assets/textures/inscriptions/449.png", 204, 34);
-	spr->continue_.itself.setPosition (120, 450);
+	spr->continue_.itself.setPosition (120, 480);
 
 	spr->sixth_night.init ("assets/textures/inscriptions/443.png", 227, 44);
-	spr->sixth_night.itself.setPosition (120, 515);
+	spr->sixth_night.itself.setPosition (120, 545);
 
 	spr->custom_night.init ("assets/textures/inscriptions/526.png", 306, 44);
-	spr->custom_night.itself.setPosition (120, 580);
+	spr->custom_night.itself.setPosition (120, 610);
+
+	FOR (i, 4) {
+		sprintf (str, "assets/textures/wtf/tw%d.png", i);
+		spr->_20_mode[i].init (str, 306, 44);
+		spr->_20_mode[i].itself.setPosition (120, 610);
+	}
 
 	spr->pointer.init ("assets/textures/inscriptions/450.png", 43, 26);
 
@@ -109,10 +122,14 @@ char *button_load (char *parent_space) {
 	btn->first_night_time2 = -1;
 	btn->show_the_number_of_nigth_time = 0;
 
+	btn->num_of_20 = rand ()%4;
+
 	btn->exit = false;
 	read_string ();
 	return (char *)btn;
 }
+
+int Ch_Nght = 1;
 
 O_UPDATE (button_update) {
 	CNTRL ("button_update");
@@ -173,6 +190,9 @@ O_UPDATE (button_update) {
 		} else {
 			btn->prev_up = false;
 		}
+		if (rand()%2 < 1) {
+			btn->num_of_20 = rand ()%4;
+		}
 		if (sf::Mouse::isButtonPressed (sf::Mouse::Left)) {
 			FOR (i, 4) {
 				if (btn->buttons[i].is_active && btn->buttons[i].spr->itself.getGlobalBounds ().contains (m)) {
@@ -195,11 +215,32 @@ O_UPDATE (button_update) {
 					btn->glitches_counter = 0;
 				}
 				btn->choosed_night = Min (btn->num_of_beaten_nigths + 1, 5);
+				if (btn->choosed_night > 1) {
+					break;
+				}
 			case 0:
 				btn->state = BUTTON_STATE::FIRST_NIGHT;
 				btn->item.play ();
 				btn->choosed_night = 1;
+				break;
+			case 2:
+				btn->state = BUTTON_STATE::SHOW_THE_NUMBER_OF_NIGHT;
+				btn->item.play ();
+				btn->static_.stop ();
+				btn->theme.stop ();
+				btn->glitches_counter = 0;
+				btn->choosed_night = 6;
+				break;
+			case 3:
+				btn->state = BUTTON_STATE::SHOW_THE_NUMBER_OF_NIGHT;
+				btn->item.play ();
+				btn->static_.stop ();
+				btn->theme.stop ();
+				btn->glitches_counter = 0;
+				btn->choosed_night = 7;
+				break;
 			}
+			Ch_Nght = btn->choosed_night;
 		}
 	
 		btn->sprites.pointer.itself.setPosition (40, btn->buttons[btn->active_but].spr->itself.getPosition().y + 6);
@@ -272,11 +313,23 @@ void draw_main_menu (button *btn) {
 	btn->sprites.title.draw (&window);
 	FOR (i, 4) {
 		if (btn->buttons[i].is_active) {
-			btn->buttons[i].spr->draw (&window);
+			if (i == 3) {
+				btn->sprites._20_mode[btn->num_of_20].draw (&window);
+			} else {
+				btn->buttons[i].spr->draw (&window);
+			}
 		}
 	}
 	if (btn->buttons[1].is_current) {
-		btn->sprites.night[btn->num_of_beaten_nigths].draw (&window);
+		btn->sprites.night[Min(4, btn->num_of_beaten_nigths)].draw (&window);
+	}
+	if (btn->num_of_beaten_nigths > 4) {
+		int x = 110;
+		FOR (i, btn->num_of_beaten_nigths - 4) {
+			btn->sprites.star.itself.setPosition (x, 330);
+			btn->sprites.star.draw (&window);
+			x += 70;
+		}
 	}
 	btn->sprites.pointer.draw (&window);
 

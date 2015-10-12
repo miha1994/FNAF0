@@ -111,7 +111,7 @@ int number_of_png (rooms *rm, int cam_cur) {
 		return 48;
 	case 7:
 		if (bonnie_room == 7 && chica_room == 7) {
-			if (rand1 > 0.7) {
+			if (rand1 > 0.9) {
 				return 2;
 			}
 			return 19;

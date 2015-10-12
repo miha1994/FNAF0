@@ -23,10 +23,12 @@ struct sprites_button {
 	sprite continue_;
 	sprite sixth_night;
 	sprite custom_night;
+	sprite _20_mode[4];
 	sprite pointer;
 	sprite first_night;
 	sprite black_screen;
 	sprite loading;
+	sprite star;
 };
 
 enum BUTTON_STATE {
@@ -57,6 +59,7 @@ public:
 	int darkness2_r;
 	int glitches_counter;
 	int glitches_r;
+	int num_of_20;
 	BUTTON_STATE state;
 	float static_glitch_shift;
 	float first_night_time1;

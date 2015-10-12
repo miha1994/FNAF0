@@ -12,7 +12,7 @@ struct sprites_camera {
 	sprite room_name[11];
 	sprite turn_on_the_camera;
 	sprite camera_disabled_audio_only;
-	sprite info[10];
+	sprite info[14];
     sprite dark_block;
     sprite visible_block;
     sprite field;
@@ -20,6 +20,7 @@ struct sprites_camera {
     sprite v[2];
 	sprite correct;
 	sprite time[6];
+	sprite dark;
 };
 
 struct sounds_camera {
